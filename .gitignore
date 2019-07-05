@@ -1,0 +1,13 @@
+# Compiled python modules
+*.pyc
+
+#Setuptools distribution folder
+/dist/
+
+# Python egg metadata, regenerated from sources
+/*.egg-info
+/*.eggs
+/*.egg
+
+# Studio files
+/.idea

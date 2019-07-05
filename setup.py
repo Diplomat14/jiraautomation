@@ -1,4 +1,5 @@
 from setuptools import setup
+import os
 
 def readme():
     with open(os.path.dirname(os.path.abspath(__file__)) + '/README.rst') as f:
@@ -13,8 +14,8 @@ setup(
     author='Aleksey Denysyuk',
     author_email='diplomt@gmail.com',
     license='MIT', #TBD
-    packages=['xdev'],
-    install_requires=[],
+    packages=['jiraautomation'],
+    install_requires=['jiraorm','xdev'],
     #dependency_links=['http://server/user/repo/tarball/master#egg=package-1.0'],
     entry_points = {
         'console_scripts':['jiraautomation-main=jiraautomation.console.command_line:main']

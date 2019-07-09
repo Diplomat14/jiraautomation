@@ -7,7 +7,7 @@ from xdev.core.logger import logger
 #temp
 from jiraautomation.operations.list_boards_operation import list_boards_operation
 from jiraautomation.operations.convert_linktofield_operation import linktofield_operation
-
+from jiraautomation.operations.planning_report_persprint_operation import planning_report_persprint_operation
 
 def main():
     l = logger("CL")
@@ -34,12 +34,15 @@ def main():
             elif args.operation == linktofield_operation.name():
                 op = linktofield_operation(l)
                 output = op.execute(container,args)
+            elif args.operation == planning_report_persprint_operation.name():
+                op = planning_report_persprint_operation(l)
+                output = op.execute(container,args)
             else:
                 l.warning("Operation %s not implemented" % str(args.operation))
 
             if output != None and args.output != None:
                 with open(args.output, "w") as f:
-                    return f.write(output)
+                    return f.write(str(output))
 
         except Exception as e:
             l.error("Exception happened during operation processing: " + str(e))
@@ -61,6 +64,7 @@ def init_arguments():
     ops = []
     ops.append(list_boards_operation.name())
     ops.append(linktofield_operation.name())
+    ops.append(planning_report_persprint_operation.name())
 
     operations_group.add_argument('-o', '--operation', required=True,
                                   help='Operation that is to be executed', choices=ops)
@@ -72,6 +76,9 @@ def init_arguments():
 
     converter_group = parser.add_argument_group('Options of operation ' + linktofield_operation.name())
     linktofield_operation.init_arguments(converter_group)
+
+    plreport_group = parser.add_argument_group('Options of operation ' + planning_report_persprint_operation.name())
+    planning_report_persprint_operation.init_arguments(plreport_group)
 
     return parser
 

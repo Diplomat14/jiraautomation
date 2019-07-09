@@ -1,8 +1,13 @@
 import argparse
 import jiraautomation
 import jiraorm.console.command_line
-from jiraautomation.core import CoreOperation
+#from jiraautomation.core import CoreOperation
 from xdev.core.logger import logger
+
+
+#temp
+from jiraautomation.boardoperation import list_boards_operation
+
 
 def main():
     l = logger("CL")
@@ -17,18 +22,17 @@ def main():
         try:
             l.msg("Operation %s" % str(args.operation))
 
-            c = None
+            container = None
             output = None
 
-            # For most of operations we need connection to JIRA so coding it once
-            #if args.operation == operation.Connect or args.operation == operation.Select:
-            #    c = operation_connect(l, args)
+            # TODO: If need to connect
+            container = jiraorm.console.command_line.operation_connect(l,args)
 
-            #if args.operation == operation.Select:
-            #    output = operation_select(l, args, c)
-            #else:
-            #    if args.operation != operation.Connect:
-            #        l.warning("Operation %s not implemented" % str(args.operation))
+            if args.operation == list_boards_operation.name():
+                op = list_boards_operation(l)
+                output = op.execute(container,args)
+            else:
+                l.warning("Operation %s not implemented" % str(args.operation))
 
             if output != None and args.output != None:
                 with open(args.output, "w") as f:
@@ -43,29 +47,52 @@ def main():
     l.msg("Command line tool finished")
 
 
-
 def init_arguments():
     parser = argparse.ArgumentParser(description='JIRA Automation Command Line tool')
 
     # Reusing common arguments (like server, user, log, output, etc.) from orm console
-    parser = jiraorm.console.command_line.init_common_arguments()
+    jiraorm.console.command_line.init_common_arguments(parser)
 
     operations_group = parser.add_argument_group('Script operations options')
-    ops = [op.name for op in list(CoreOperation)]
+
+    ops = []
+    ops.append(list_boards_operation.name())
+
     operations_group.add_argument('-o', '--operation', required=True,
                                   help='Operation that is to be executed', choices=ops)
-
     # Reusing common arguments for operation (like query, fields) from orm console
     operations_group = jiraorm.console.command_line.init_common_operations_arguments(operations_group)
 
+    boards_group = parser.add_argument_group('Options of operation ' + list_boards_operation.name())
+    list_boards_operation.init_arguments(boards_group)
+
     return parser
 
-def parse_arguments(parser:argparse.ArgumentParser):
+def parse_arguments(parser):
     args = parser.parse_args()
 
-    args.operation = CoreOperation[args.operation]
+    list_boards_operation.parse_arguments(args)
 
     return args
+
+
+
+
+def operation_connect(l:logger, args):
+    ccfg = ConnectionConfig(args.server)
+    scfg = SecurityConfig(args.username, args.access_token)
+
+    c = JSWContainer(l, ccfg, scfg)
+
+    c.getJIRA()
+    l.msg("Successfully connected to JIRA")
+
+    return c
+
+
+
+
+
 
 if __name__ == "__main__":
     main()

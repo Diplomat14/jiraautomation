@@ -6,7 +6,7 @@ from xdev.core.logger import logger
 
 
 #temp
-from jiraautomation.boardoperation import list_boards_operation
+from jiraautomation.list_boards_operation import list_boards_operation
 
 
 def main():

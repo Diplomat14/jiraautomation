@@ -1,6 +1,6 @@
 import argparse
 import jiraorm.console.command_line
-#from jiraautomation.core import CoreOperation
+from jiraautomation.automationcore import automationcore
 from xdev.core.logger import logger
 
 
@@ -14,6 +14,11 @@ def main():
     l.msg("JIRA Automation Command Line tool started")
 
     try:
+        # Adding operations
+        automationcore.add_operation(list_boards_operation)
+        automationcore.add_operation(linktofield_operation)
+        automationcore.add_operation(planning_report_persprint_operation)
+
         # This shall prepare and parse all arguments so that we can easily work with them afterwards
         args = parse_arguments(init_arguments())
         if args.logoutput != None:
@@ -28,16 +33,14 @@ def main():
             # TODO: If need to connect
             container = jiraorm.console.command_line.operation_connect(l,args)
 
-            if args.operation == list_boards_operation.name():
-                op = list_boards_operation(l)
-                output = op.execute(container,args)
-            elif args.operation == linktofield_operation.name():
-                op = linktofield_operation(l)
-                output = op.execute(container,args)
-            elif args.operation == planning_report_persprint_operation.name():
-                op = planning_report_persprint_operation(l)
-                output = op.execute(container,args)
-            else:
+            found = False
+            ops = automationcore.get_operations()
+            for op in ops.values():
+                if args.operation == op.name():
+                    found = True
+                    op_instance = op(l)
+                    output = op_instance.execute(container, args)
+            if found == False:
                 l.warning("Operation %s not implemented" % str(args.operation))
 
             if output != None and args.output != None:
@@ -61,31 +64,25 @@ def init_arguments():
 
     operations_group = parser.add_argument_group('Script operations options')
 
-    ops = []
-    ops.append(list_boards_operation.name())
-    ops.append(linktofield_operation.name())
-    ops.append(planning_report_persprint_operation.name())
-
+    opnames = automationcore.get_operation_names()
     operations_group.add_argument('-o', '--operation', required=True,
-                                  help='Operation that is to be executed', choices=ops)
+                                  help='Operation that is to be executed', choices=opnames)
     # Reusing common arguments for operation (like query, fields) from orm console
     operations_group = jiraorm.console.command_line.init_common_operations_arguments(operations_group)
 
-    boards_group = parser.add_argument_group('Options of operation ' + list_boards_operation.name())
-    list_boards_operation.init_arguments(boards_group)
-
-    converter_group = parser.add_argument_group('Options of operation ' + linktofield_operation.name())
-    linktofield_operation.init_arguments(converter_group)
-
-    plreport_group = parser.add_argument_group('Options of operation ' + planning_report_persprint_operation.name())
-    planning_report_persprint_operation.init_arguments(plreport_group)
+    ops = automationcore.get_operations()
+    for op in ops.values():
+        g = parser.add_argument_group('Options of operation ' + op.name())
+        op.init_arguments(g)
 
     return parser
 
 def parse_arguments(parser):
     args = parser.parse_args()
 
-    list_boards_operation.parse_arguments(args)
+    ops = automationcore.get_operations()
+    for op in ops.values():
+        op.parse_arguments(args)
 
     return args
 

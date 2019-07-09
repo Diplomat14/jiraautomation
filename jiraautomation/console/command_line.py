@@ -7,6 +7,7 @@ from xdev.core.logger import logger
 
 #temp
 from jiraautomation.list_boards_operation import list_boards_operation
+from jiraautomation.convert_linktofield_operation import linktofield_operation
 
 
 def main():
@@ -30,6 +31,9 @@ def main():
 
             if args.operation == list_boards_operation.name():
                 op = list_boards_operation(l)
+                output = op.execute(container,args)
+            elif args.operation == linktofield_operation.name():
+                op = linktofield_operation(l)
                 output = op.execute(container,args)
             else:
                 l.warning("Operation %s not implemented" % str(args.operation))
@@ -57,6 +61,7 @@ def init_arguments():
 
     ops = []
     ops.append(list_boards_operation.name())
+    ops.append(linktofield_operation.name())
 
     operations_group.add_argument('-o', '--operation', required=True,
                                   help='Operation that is to be executed', choices=ops)
@@ -66,6 +71,9 @@ def init_arguments():
     boards_group = parser.add_argument_group('Options of operation ' + list_boards_operation.name())
     list_boards_operation.init_arguments(boards_group)
 
+    converter_group = parser.add_argument_group('Options of operation ' + linktofield_operation.name())
+    linktofield_operation.init_arguments(converter_group)
+
     return parser
 
 def parse_arguments(parser):
@@ -74,24 +82,6 @@ def parse_arguments(parser):
     list_boards_operation.parse_arguments(args)
 
     return args
-
-
-
-
-def operation_connect(l:logger, args):
-    ccfg = ConnectionConfig(args.server)
-    scfg = SecurityConfig(args.username, args.access_token)
-
-    c = JSWContainer(l, ccfg, scfg)
-
-    c.getJIRA()
-    l.msg("Successfully connected to JIRA")
-
-    return c
-
-
-
-
 
 
 if __name__ == "__main__":

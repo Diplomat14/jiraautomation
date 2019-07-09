@@ -14,6 +14,8 @@ class linktofield_operation(basic_operation):
     def init_arguments(operation_group):
         operation_group.add_argument('-ltfFID', '--linktofield_fieldid', required=False,
                                           help='ID of the target field to write other side of link to')
+        operation_group.add_argument('-ltfLN', '--linktofield_linkname', required=False,
+                                          help='Name of the link connection')
         pass
 
     @staticmethod
@@ -43,6 +45,7 @@ class linktofield_operation(basic_operation):
 
             issuesBasisQuery = args.query
             fieldParentIssueId = args.linktofield_fieldid
+            linkName = args.linktofield_linkname
             jira = container.getJIRA()
 
             try:
@@ -50,7 +53,7 @@ class linktofield_operation(basic_operation):
                 l.msg(str(len(issues)) + " issues found")
 
                 try:
-                    preparedIssues = prepareOperationData(issues, fieldParentIssueId, l)
+                    preparedIssues = prepareOperationData(issues, fieldParentIssueId, linkName, l)
 
                     # if self.__poolSize > 0:
                     #    self.__pool.map(processIssueExt, preparedIssues)
@@ -73,18 +76,20 @@ class ConvertLinkToFieldOperationData(object):
     issue = None
     fieldName = ''
     logger = None
+    linkName = ''
 
-    def __init__( self, issue, fieldName : str, logger ):
+    def __init__( self, issue, fieldName : str, linkName : str, logger ):
         self.issue = issue
         self.fieldName = fieldName
         self.logger = logger
+        self.linkName = linkName
 
 
-def prepareOperationData(issues, fieldName: str, parentLogger):
+def prepareOperationData(issues, fieldName: str, linkName : str, parentLogger):
     datas = []
 
     for issue in issues:
-        datas.append(ConvertLinkToFieldOperationData(issue, fieldName,
+        datas.append(ConvertLinkToFieldOperationData(issue, fieldName, linkName,
                                                      logger.from_parent(issue.original.key, parentLogger)))
 
     return datas
@@ -94,17 +99,18 @@ def processIssueExt(data : ConvertLinkToFieldOperationData ):
     issue = data.issue
     logger = data.logger
     fieldName = data.fieldName
+    linkName = data.linkName
     logger.msg(str("Processing issue [" + str(issue.original.key) + "] " + str(issue.original.fields.summary) + ""))
 
     try:
-        processIssue(issue, fieldName, logger)
+        processIssue(issue, fieldName, linkName, logger)
         logger.msg("Issue processed")
     except Exception as e:
         logger.msg("Exception occured:" + str(e))
 
 
-def processIssue(issue, fieldName, logger):
-    inwardConsistsOfLinks = issue.getLinksByType('Consists of', True)
+def processIssue(issue, fieldName, linkName, logger):
+    inwardConsistsOfLinks = issue.getLinksByType(linkName, True)
 
     if len(inwardConsistsOfLinks) > 1:
         logger.warning("Issue is part of " + str(len(inwardConsistsOfLinks)) + " issues. Setup parent manually")

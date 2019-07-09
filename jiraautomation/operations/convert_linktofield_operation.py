@@ -1,4 +1,4 @@
-from jiraautomation.operation import  basic_operation
+from jiraautomation.operations.operation import  basic_operation
 from xdev.core.logger import logger
 
 class linktofield_operation(basic_operation):

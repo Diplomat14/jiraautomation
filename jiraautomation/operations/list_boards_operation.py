@@ -1,4 +1,4 @@
-from jiraautomation.operation import  basic_operation
+from jiraautomation.operations.operation import  basic_operation
 
 
 class list_boards_operation(basic_operation):

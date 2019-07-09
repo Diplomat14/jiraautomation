@@ -1,13 +1,12 @@
 import argparse
-import jiraautomation
 import jiraorm.console.command_line
 #from jiraautomation.core import CoreOperation
 from xdev.core.logger import logger
 
 
 #temp
-from jiraautomation.list_boards_operation import list_boards_operation
-from jiraautomation.convert_linktofield_operation import linktofield_operation
+from jiraautomation.operations.list_boards_operation import list_boards_operation
+from jiraautomation.operations.convert_linktofield_operation import linktofield_operation
 
 
 def main():

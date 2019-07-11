@@ -1,0 +1,214 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <link rel="shortcut icon" type="image/ico" href="favicon.ico" />
+  <title>SlickGrid example 1: Basic grid</title>
+  <link rel="stylesheet" href="SlickGrid-2.4.3/slick.grid.css" type="text/css"/>
+  <link rel="stylesheet" href="SlickGrid-2.4.3/css/smoothness/jquery-ui-1.11.3.custom.css" type="text/css"/>
+  <link rel="stylesheet" href="report.css" type="text/css"/>
+</head>
+<body>
+
+<div id="Filter" style="width:100%;height:50px;">
+<p>Show only tasks: <label>Including title:</label><input type=text id="txtSearch"></p>
+<p>Groups actions: <button onclick="dataView.collapseAllGroups()">Collapse all groups</button> <button onclick="dataView.expandAllGroups()">Expand all groups</button></p>
+</div>
+
+<div id="myGrid" style="width:100%;height:600px;"></div>
+
+<script src="SlickGrid-2.4.3/lib/jquery-1.11.2.min.js"></script>
+<script src="SlickGrid-2.4.3/lib/jquery.event.drag-2.3.0.js"></script>
+
+<script src="SlickGrid-2.4.3/slick.core.js"></script>
+<script src="SlickGrid-2.4.3/slick.grid.js"></script>
+<script src="SlickGrid-2.4.3/slick.dataview.js"></script>
+<script src="SlickGrid-2.4.3/slick.groupitemmetadataprovider.js"></script>
+
+
+<script src="data.js"></script>
+
+<script>
+  var grid;
+  var summarySearchString = ""
+  //var data = [];
+  var dataView;
+  var dataMap = {};
+
+  data.forEach(function(element){
+    dataMap[element['id_original']] = element;
+  });
+  var jiraProjectPath = "https://drivings.atlassian.net/";
+
+  function formatTaskFull(key, summary, status) {
+    title = ("[" + key + "] " + summary + "(" + status + ")").replace("\"","\\\"");
+    tclass = "";
+    if (status == 'Closed') tclass = "closed"
+    if (summary.length > 25) summary = summary.substr(0,25)+"...";
+
+    return "<a href=\"" + jiraProjectPath + "browse/" + key + "\" target='\"_blank\"' title=\"" + title + "\" class='" + tclass + "'>" + summary + "</a>";
+  }
+
+  function formatTask(key) {
+    return "<a href=\"" + jiraProjectPath + "browse/" + key + "\" target='\"_blank\"'>" + key + "</a>";
+  }
+
+  function formatter_key(row, cell, value, columnDef, dataContext) {
+    return formatTask(value);
+  }
+
+  function formatter_sprint(row, cell, value, columnDef, dataContext){
+    sprintId = columnDef['id'];
+    text = "";
+    if (value.hasOwnProperty(sprintId)) { // if there are some tasks in this sprint
+      tasks = value[sprintId];
+      for (var taskidx in tasks) {
+        taskid = tasks[taskidx];
+        if (dataMap.hasOwnProperty(taskid)) {
+          text += formatTaskFull( dataMap[taskid]['key'], dataMap[taskid]['summary'], dataMap[taskid]['status'] ) + "<br>";
+        } else {
+          return ""
+        }
+      }
+    }
+    return text;
+  }
+
+
+  var columns = [
+    //{id: "id", name: "Id", field: "id"},
+    {id: "key", name: "Key", field: "key", width:100, formatter:formatter_key},
+    {id: "type", name: "Type", field: "issuetype", width:50},
+    {id: "lom_relation", name: "LOM Relation", field: "lom_relation", width:100},
+    {id: "summary", name: "Summary", field: "summary", width:300},
+    {id: "status", name: "Status", field: "status"},
+    
+	{id: "first-task", name: "First task at", field: "first-task"},
+	{id: "last-task", name: "Last task at", field: "last-task"},
+		
+	//{id: "sprint-12", name: "Sprint 12", field: "sprint-12"}
+  ];
+
+  // Getting a list of sprints and adding the as columns
+  for (var sprid in involvedSprints) {
+      sprname = (sprid == -1) ? "Backlog" : involvedSprints[sprid];
+      columns.push({id: sprid, name: sprname, field:"sprint_tasks",width:125,formatter:formatter_sprint})
+  }
+
+  var options = {
+    enableCellNavigation: true,
+    enableColumnReorder: false
+  };
+
+
+
+
+  
+  function myFilter(item) {
+	  if (summarySearchString != "" && item["summary"].indexOf(summarySearchString) == -1) {
+		return false;
+	  }
+
+	  if (item.issuetype != "Epic" ) {
+	  //if (item.issuetype == "Feature Group" || item.issuetype == "High-Level Feature" || item.issuetype == "Feature" ) {
+		return false;
+	  }
+	  
+	  return true;
+	}
+
+  $(function () {
+	var groupItemMetadataProvider = new Slick.Data.GroupItemMetadataProvider();
+	
+	dataView = new Slick.Data.DataView({
+		groupItemMetadataProvider: groupItemMetadataProvider
+	  });
+
+    grid = new Slick.Grid("#myGrid", dataView, columns, options);
+	
+	grid.registerPlugin(groupItemMetadataProvider);
+	
+	// Make the grid respond to dataView change events.
+	dataView.onRowCountChanged.subscribe(function (e, args) {
+	  grid.updateRowCount();
+	  grid.render();
+	});
+
+	dataView.onRowsChanged.subscribe(function (e, args) {
+	  grid.invalidateRows(args.rows);
+	  grid.render();
+	});
+	
+	dataView.setGrouping([
+		{
+			getter: "fg",
+			formatter: function (g) {
+				groupItem = dataMap[g.value]
+				if (groupItem == undefined) { groupItem = {}; groupItem.key = g.value; groupItem.summary = "" }
+				return "Feature Group:  [" + groupItem.key + "] " + groupItem.summary + "  <span style='color:green'>(" + g.count + " items)</span>";
+			},
+			aggregators: [
+			
+			],
+			aggregateCollapsed: false,
+			lazyTotalsCalculation: true
+		},
+		{
+			getter: "hlf",
+			formatter: function (g) {
+			    groupItem = dataMap[g.value]
+				//groupItem = dataView.getItemById(g.value)
+				if (groupItem == undefined) { groupItem = {}; groupItem.key = g.value; groupItem.summary = "" }
+				return "HLF:  [" + groupItem.key + "] " + groupItem.summary + "  <span style='color:green'>(" + g.count + " items)</span>";
+			},
+			aggregators: [
+			
+			],
+			aggregateCollapsed: false,
+			lazyTotalsCalculation: true
+		},
+		{
+			getter: "f",
+			formatter: function (g) {
+				groupItem = dataMap[g.value]
+			    //groupItem = dataView.getItemById(g.value)
+				if (groupItem == undefined) { groupItem = {}; groupItem.key = g.value; groupItem.summary = "" }
+				return "Feature:  [" + groupItem.key + "] " + groupItem.summary + "  <span style='color:green'>(" + g.count + " items)</span>";
+			},
+			aggregators: [
+			
+			],
+			aggregateCollapsed: false,
+			lazyTotalsCalculation: true
+		}
+	]);
+	
+	
+	// wire up the search textbox to apply the filter to the model
+	$("#txtSearch").keyup(function (e) {
+		//Slick.GlobalEditorLock.cancelCurrentEdit();
+
+		// clear on Esc
+		if (e.which == 27) {
+		  this.value = "";
+		}
+
+		summarySearchString = this.value;
+		dataView.refresh();
+	})
+	
+	
+	dataView.beginUpdate();
+    dataView.setItems(data);
+    dataView.setFilter(myFilter);
+    dataView.endUpdate();
+	
+	
+	
+  })
+  
+  
+  
+</script>
+</body>
+</html>

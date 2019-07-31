@@ -16,13 +16,14 @@ class set_due_by_sprint(basic_operation):
     @staticmethod
     def parse_arguments(args):
         dict = {}
-        for s in args.sdbs_sprints.split(","):
-            splitted = s.split("=")
-            if len(splitted)==2:
-                dict[splitted[0]] = splitted[1]
-            # TODO: Add logger
-            #else:
-                #self.logger.warning("Cannot parse sprint argument %s. Expected to be splitted by '=' in two pieces. Skippng" % s )
+        if hasattr(args,'sdbs_sprints') and args.sdbs_sprints != None:
+            for s in args.sdbs_sprints.split(","):
+                splitted = s.split("=")
+                if len(splitted)==2:
+                    dict[splitted[0]] = splitted[1]
+                # TODO: Add logger
+                #else:
+                    #self.logger.warning("Cannot parse sprint argument %s. Expected to be splitted by '=' in two pieces. Skippng" % s )
         args.sdbs_sprints = dict
 
     def __init__(self, iLogger):

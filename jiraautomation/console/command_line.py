@@ -8,6 +8,7 @@ from xdev.core.logger import logger
 from jiraautomation.operations.list_boards_operation import list_boards_operation
 from jiraautomation.operations.convert_linktofield_operation import linktofield_operation
 from jiraautomation.operations.planning_report_persprint_operation import planning_report_persprint_operation
+from jiraautomation.operations.planning_report_persprint_operation2 import planning_report_persprint_operation2
 from jiraautomation.operations.set_due_by_sprint import set_due_by_sprint
 from jiraautomation.operations.export_issues_as_json import export_issues_as_json
 
@@ -20,6 +21,7 @@ def main():
         automationcore.add_operation(list_boards_operation)
         automationcore.add_operation(linktofield_operation)
         automationcore.add_operation(planning_report_persprint_operation)
+        automationcore.add_operation(planning_report_persprint_operation2)
         automationcore.add_operation(set_due_by_sprint)
         automationcore.add_operation(export_issues_as_json)
 

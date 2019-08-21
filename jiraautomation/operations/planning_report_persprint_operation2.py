@@ -5,7 +5,7 @@ from xdev.types.complex.graph import graph_link_type
 from xdev.types.complex.tree import tree_type
 from xdev.types.complex.tree import tree_node_type
 from xdev.types.algorithms.graph_to_tree_converter import conversionrules
-
+from xdev.types.algorithms.graph_to_tree_converter import  graph_to_tree_converter
 
 startingnodes = []
 root_for_not_processed_key = ""
@@ -52,6 +52,12 @@ class planning_report_persprint_operation2(basic_operation):
 
                 l.msg("Outputting graph")
                 print_grah(graph, l)
+
+                converter = graph_to_tree_converter(l, issue_to_str)
+                resulting_tree = converter.convert(graph, starting_nodes, graph_root_for_not_processed_data, rules)
+
+                l.msg("Outputting tree")
+                print_tree(resulting_tree, l)
 
                 return None
 

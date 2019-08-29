@@ -1,4 +1,5 @@
 import argparse
+import traceback
 import jiraorm.console.command_line
 from jiraautomation.automationcore import automationcore
 from xdev.core.logger import logger
@@ -29,6 +30,8 @@ def main():
         args = parse_arguments(init_arguments())
         if args.logoutput != None:
             l.set_path(args.logoutput)
+        if args.debug != None:
+            l.set_debug(args.debug)
 
         try:
             l.msg("Operation %s" % str(args.operation))
@@ -54,10 +57,11 @@ def main():
                     return f.write(str(output))
 
         except Exception as e:
-            l.error("Exception happened during operation processing: " + str(e))
+            l.error("Exception happened during operation processing: " + str(e), e)
 
     except Exception as e:
-        l.error("Exception on commandline arguments parsing: " + str(e))
+        l.error("Exception on commandline arguments parsing: " + str(e),e)
+
 
     l.msg("Command line tool finished")
 

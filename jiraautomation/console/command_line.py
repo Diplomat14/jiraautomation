@@ -6,12 +6,7 @@ from xdev.core.logger import logger
 
 
 #temp
-from jiraautomation.operations.list_boards_operation import list_boards_operation
-from jiraautomation.operations.convert_linktofield_operation import linktofield_operation
-from jiraautomation.operations.planning_report_persprint_operation import planning_report_persprint_operation
-from jiraautomation.operations.planning_report_persprint_operation2 import planning_report_persprint_operation2
-from jiraautomation.operations.set_due_by_sprint import set_due_by_sprint
-from jiraautomation.operations.export_issues_as_json import export_issues_as_json
+import jiraautomation.operations
 
 def main():
     l = logger("CL")
@@ -19,12 +14,8 @@ def main():
 
     try:
         # Adding operations
-        automationcore.add_operation(list_boards_operation)
-        automationcore.add_operation(linktofield_operation)
-        automationcore.add_operation(planning_report_persprint_operation)
-        automationcore.add_operation(planning_report_persprint_operation2)
-        automationcore.add_operation(set_due_by_sprint)
-        automationcore.add_operation(export_issues_as_json)
+        for op in jiraautomation.operations.register.operations:
+            automationcore.add_operation(op)
 
         # This shall prepare and parse all arguments so that we can easily work with them afterwards
         args = parse_arguments(init_arguments())

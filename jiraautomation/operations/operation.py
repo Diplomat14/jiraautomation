@@ -1,6 +1,20 @@
 from xdev.core.logger import logger
 from enum import Enum
 
+class operations_register(object):
+
+    def __init__(self):
+        self.__operations = []
+
+    def register(self,operation):
+        assert isinstance(operation,type), "operation has to be a child of basic_operation type"
+        if operation not in self.__operations:
+            self.__operations.append(operation)
+
+    @property
+    def operations(self):
+        return self.__operations
+
 class basic_operation(object):
 
     __logger = None

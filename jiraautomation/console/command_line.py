@@ -44,7 +44,7 @@ def main():
                 l.warning("Operation %s not implemented" % str(args.operation))
 
             if output != None and args.output != None:
-                with open(args.output, "w") as f:
+                with open(args.output,"w", encoding='utf-8') as f:
                     return f.write(str(output))
 
         except Exception as e:

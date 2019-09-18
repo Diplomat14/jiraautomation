@@ -17,10 +17,10 @@ class generate_wbs(basic_operation):
     @staticmethod
     def init_arguments(operation_group):
         generate_issues_tree.init_arguments(operation_group)
-        operation_group.add_argument('-gwbsEC', '--generatewbs_EpicCategory', required=True, help='Name of the Epic Category Field')
-        operation_group.add_argument('-gwbsPERTO', '--generatewbs_PERTO', required=True, help='Name of the PERT Optimistic Field')
-        operation_group.add_argument('-gwbsPERTR', '--generatewbs_PERTR', required=True, help='Name of the PERT Realistic Field')
-        operation_group.add_argument('-gwbsPERTP', '--generatewbs_PERTP', required=True, help='Name of the PERT Pessimistic Field')
+        operation_group.add_argument('-gwbsEC', '--generatewbs_EpicCategory', required=False, help='Name of the Epic Category Field')
+        operation_group.add_argument('-gwbsPERTO', '--generatewbs_PERTO', required=False, help='Name of the PERT Optimistic Field')
+        operation_group.add_argument('-gwbsPERTR', '--generatewbs_PERTR', required=False, help='Name of the PERT Realistic Field')
+        operation_group.add_argument('-gwbsPERTP', '--generatewbs_PERTP', required=False, help='Name of the PERT Pessimistic Field')
         operation_group.add_argument('-gwbsNWTM', '--generatewbs_NonWBSTypesMapping', required=False,
                                      help='List type mappings and CSS style to use for non non WBS grouping items (like features) in format: <issue_type>=<css_prefix_to_use>{[,<issue_type>=<css_prefix_to_use>]}')
         pass

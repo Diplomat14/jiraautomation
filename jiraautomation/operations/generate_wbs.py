@@ -132,24 +132,63 @@ class FBSPathBuilder(object):
     def __init__(self,field = 'summary', separator = ' / '):
         self.__separator = separator
         self.__field = field
+        self.__cache = {}
 
     def build(self,node_tree):
         assert isinstance(node_tree,tree_node_type)
         assert isinstance(node_tree.data,IssueExt)
 
+        if node_tree not in self.__cache:
+            parents = []
+
+            currentparent = node_tree.parent
+            while currentparent != None:
+                assert isinstance(currentparent, tree_node_type)
+                assert isinstance(currentparent.data, IssueExt)
+                parents.insert(0,currentparent)
+                currentparent = currentparent.parent
+
+            path = self.__parentsToString(parents)
+            self.__cache[node_tree] = (parents,path)
+
+        return self.__cache[node_tree][1]
+
+    def __parentsToString(self,parents):
         path = ""
-
-        currentparent = node_tree.parent
-        while currentparent != None:
-            assert isinstance(currentparent, tree_node_type)
-            assert isinstance(currentparent.data, IssueExt)
-            if path == "":
-                path = currentparent.data.getFieldAsString(self.__field)
-            else:
-                path = "%s%s%s" % (currentparent.data.getFieldAsString(self.__field), self.__separator, path)
-            currentparent = currentparent.parent
-
-        if path == "":
-            path = node_tree.data.getFieldAsString(self.__field)
-
+        if parents is not None:
+            for p in reversed(parents):
+                if path == "":
+                    path = self.__parentToString(p)
+                else:
+                    path = "%s%s%s" % (self.__parentToString(p), self.__separator, path)
         return path
+
+
+    def __parentToString(self,parent):
+        return parent.data.getFieldAsString(self.__field)
+
+    def level(self,node_tree):
+        if node_tree not in self.__cache:
+            self.build(node_tree)
+
+        (parents,path) = self.__cache[node_tree]
+        if path == "":
+            return 1
+        else:
+            return path.count(self.__separator)+2
+
+    def parentAsString(self,node_tree,level,all_remaining):
+        if node_tree not in self.__cache:
+            self.build(node_tree)
+
+        (parents,path) = self.__cache[node_tree]
+
+        if len(parents) == 0:
+            return ""
+        elif level > len(parents):
+            return ""
+        else:
+            if all_remaining == False:
+                return self.__parentToString(parents[level - 1])
+            else:
+                return self.__parentsToString(parents[level - 1:])

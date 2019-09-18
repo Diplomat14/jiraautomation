@@ -13,13 +13,16 @@
             <thead>
             <tr>
                 <!-- FBS -->
-                <th class="" colspan="5">Summary</th>
+                <th class="" colspan="10">Summary</th>
 
                 <!-- WBS -->
                 <th class="newsection" colspan="3">Details</th>
 
                 <!-- Initial plan -->
-                <th class="newsection" colspan="8">Initial plan</th>
+                <th class="newsection" colspan="6">Initial plan</th>
+
+                <!-- Current plan -->
+                <th class="newsection" colspan="3">Current plan</th>
 
                 <!-- Related issues -->
                 <!--<th class="newsection" colspan="4">Related issues</th>-->
@@ -40,13 +43,18 @@
                 <th class="narrow">Type</th>
                 <th class="narrow">ID</th>
                 <th class="narrow">Status</th>
-                <th class="wide">FBS Path</th>
+                <th class="narrow">FBS Level</th>
+                <th class="narrow">FBS Path</th>
+                <th class="narrow">FBS Level 1</th>
+                <th class="narrow">FBS Level 2</th>
+                <th class="narrow">FBS Level 3</th>
+                <th class="narrow">FBS Level 4+</th>
                 <th class="wide">FBS/WBS Title</th>
 
                 <!-- WBS -->
                 <th class="newsection">LOM Relation</th>
                 <th class="">Domain relation</th>
-                <th class="">Description</th>
+                <th class="narrow">Description</th>
 
                 <!-- Initial plan -->
                 <th class="newsection">PERT Opt</th>
@@ -55,6 +63,9 @@
                 <th class="">PERT Estimation (calculated)</th>
                 <th class="">Original est.</th>
                 <th class="">Sprint</th>
+
+                <!-- Current plan -->
+                <th class="newsection">Assignee</th>
                 <th class="">Spent time</th>
                 <th class="">Remaining est.</th>
 
@@ -92,23 +103,22 @@
             </thead>
             <tbody>
 
-            {% macro FBSPath(wbselementtreenode, separator=' / ') -%}
-
-            {%- endmacro %}
-
             {# WBS Element Row start #}
             {% for wbselement in param_wbslist %}
             {% set issue = wbselement.data %}
             {% set issuetype = issue.getFieldAsString('issuetype') %}
             <tr class="row{% if issuetype in param_nonwbstypesmapping %}{{ param_nonwbstypesmapping[issuetype] }}{% else %}{{ 'WBS' }}{% endif %}">
                 <!-- FBS -->
-                <td class="">{{ issuetype }}</td>
-                <td class=""><a href="{{ param_serverbase }}/browse/{{ issue.getFieldAsString('key') }}">{{ issue.getFieldAsString('key') }}</a></td>
-                <td class="">{{ issue.getFieldAsString('status') }}</td>
-                <td class="">{{ param_FBSPathBuilder.build(wbselement) }}</td>
-                <td class="">
-                        {{ issue.getFieldAsString('summary') }}
-                </td>
+                <td class="narrow">{{ issuetype }}</td>
+                <td class="narrow"><a href="{{ param_serverbase }}/browse/{{ issue.getFieldAsString('key') }}">{{ issue.getFieldAsString('key') }}</a></td>
+                <td class="narrow">{{ issue.getFieldAsString('status') }}</td>
+                <td class="narrow"><a title="{{ param_FBSPathBuilder.level(wbselement)|striptags|escape }}">{{ param_FBSPathBuilder.level(wbselement)|escape }}</a></td>
+                <td class="narrow"><a title="{{ param_FBSPathBuilder.build(wbselement)|striptags|escape }}">{{ param_FBSPathBuilder.build(wbselement)|escape }}</a></td>
+                <td class="narrow"><a title="{{ param_FBSPathBuilder.parentAsString(wbselement,1,False)|striptags|escape }}">{{ param_FBSPathBuilder.parentAsString(wbselement,1,False)|escape }}</a></td>
+                <td class="narrow"><a title="{{ param_FBSPathBuilder.parentAsString(wbselement,2,False)|striptags|escape }}">{{ param_FBSPathBuilder.parentAsString(wbselement,2,False)|escape }}</a></td>
+                <td class="narrow"><a title="{{ param_FBSPathBuilder.parentAsString(wbselement,3,False)|striptags|escape }}">{{ param_FBSPathBuilder.parentAsString(wbselement,3,False)|escape }}</a></td>
+                <td class="narrow"><a title="{{ param_FBSPathBuilder.parentAsString(wbselement,4,True)|striptags|escape }}">{{ param_FBSPathBuilder.parentAsString(wbselement,4,True)|escape }}</a></td>
+                <td class="key">{{ issue.getFieldAsString('summary') }}</td>
 
                 <!-- WBS -->
                 <td class="newsection">{% if issuetype == "Epic" %}{{ issue.getFieldAsString(param_epiccategoryfield) }}{% endif %}</td>
@@ -116,10 +126,9 @@
                     {% set components = issue.getField('components') %}
                     {% if components is iterable %}{{ components|join(', ',attribute='name') }}{% endif %}
                 </td>
-                <td class=""><a title="{{ issue.getFieldAsString('description')|escape }}">{{ issue.getFieldAsString('description')|truncate(40) }}</a></td>
+                <td class="narrow"><a title="{{ issue.getFieldAsString('description')|striptags|escape }}">{{ issue.getFieldAsString('description')|striptags|escape|truncate(40) }}</a></td>
 
                 <!-- Initial plan -->
-                {# PERT #}
                 {% set perto = issue.getFieldAsString(param_perto_fieldid)|float %}
                 <td class="newsection">{% if perto != 0 %}{{ perto }}{% endif %}</td>
                 {% set pertrm = issue.getFieldAsString(param_pertrm_fieldid)|float %}
@@ -133,6 +142,9 @@
 
                 <td class="">{{ issue.getFieldAsString('lastsprint') }}</td>
                 {% set timespent = (issue.getField('timespent')|float / 60 / 60)|float %}
+
+                <!-- Current plan -->
+                <td class="newsection">{{ issue.getFieldAsString('assignee') }}</td>
 
                 {% set timespent = (issue.getField('timespent')|float / 60 / 60)|float %}
                 <td class="">{% if timespent != 0 %}{{ "%.2f" % timespent }} hours{% endif %}</td>

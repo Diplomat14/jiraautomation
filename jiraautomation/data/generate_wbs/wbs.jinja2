@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>WBS</title>
+    <link rel="stylesheet" type="text/css" href="wbs.css">
+</head>
+<body>
+
+
+<div class="container-table100">
+    <div class="table100">
+        <table data-vertable="ver1">
+            <thead>
+            <tr>
+                <!-- FBS -->
+                <th class="" colspan="5">Summary</th>
+
+                <!-- WBS -->
+                <th class="newsection" colspan="3">Details</th>
+
+                <!-- Initial plan -->
+                <th class="newsection" colspan="8">Initial plan</th>
+
+                <!-- Related issues -->
+                <!--<th class="newsection" colspan="4">Related issues</th>-->
+
+                <!-- Calculated Summary -->
+                <!--Calculated Summary</th>-->
+
+                <!-- Checklist -->
+                <!--<th class="newsection" colspan="4">Checklist</th>-->
+
+                <!-- Planning -->
+                <!--<th class="newsection" colspan="8">Closed sprints</th>-->
+            </tr>
+            </thead>
+            <thead>
+            <tr class="rowWBS head">
+                <!-- FBS -->
+                <th class="narrow">Type</th>
+                <th class="narrow">ID</th>
+                <th class="narrow">Status</th>
+                <th class="wide">FBS Path</th>
+                <th class="wide">FBS/WBS Title</th>
+
+                <!-- WBS -->
+                <th class="newsection">LOM Relation</th>
+                <th class="">Domain relation</th>
+                <th class="">Description</th>
+
+                <!-- Initial plan -->
+                <th class="newsection">PERT Opt</th>
+                <th class="">PERT Real</th>
+                <th class="">PERT Pess</th>
+                <th class="">PERT Estimation (calculated)</th>
+                <th class="">Original est.</th>
+                <th class="">Sprint</th>
+                <th class="">Spent time</th>
+                <th class="">Remaining est.</th>
+
+                <!-- Related issues -->
+                <!--<th class="newsection">Risks</th>
+                <th class="">Problems</th>
+                <th class="">Dependencies</th>
+                <th class="">Assumptions</th>
+                -->
+                <!-- Calculated Summary -->
+                <!--<th class="newsection">Starts at</th>
+                <th class="">Ends at</th>
+                <th class="">Risk</th>
+                <th class="">Status</th>
+                <th class="">RTE</th>
+                -->
+                <!-- Checklist -->
+                <!--<th class="newsection"><a title="Calculated status versus actual">Status</a></th>
+                <th class=""><a title="Calculated remainings. original">Estimate</a></th>
+                <th class=""><a title="Tasks in backlog no release set, previous sprints,etc.">Not planned</a></th>
+                <th class=""><a title="If current plan fits to deadline sprint">Deadline</a></th>
+                -->
+
+                <!-- Planning -->
+                <!--<th class="newsection">Closed sprints</th>
+                <th class="">Empty sprints</th>
+                <th class="">Sprint 20</th>
+                <th class="">Sprint 21</th>
+                <th class="">Sprint 22</th>
+                <th class="">Sprint 23</th>
+                <th class="">Future sprints</th>
+                <th class="">Backlog</th>
+                -->
+            </tr>
+            </thead>
+            <tbody>
+
+            {% macro FBSPath(wbselementtreenode, separator=' / ') -%}
+
+            {%- endmacro %}
+
+            {# WBS Element Row start #}
+            {% for wbselement in param_wbslist %}
+            {% set issue = wbselement.data %}
+            {% set issuetype = issue.getFieldAsString('issuetype') %}
+            <tr class="row{% if issuetype in param_nonwbstypesmapping %}{{ param_nonwbstypesmapping[issuetype] }}{% else %}{{ 'WBS' }}{% endif %}">
+                <!-- FBS -->
+                <td class="">{{ issuetype }}</td>
+                <td class=""><a href="{{ param_serverbase }}/browse/{{ issue.getFieldAsString('key') }}">{{ issue.getFieldAsString('key') }}</a></td>
+                <td class="">{{ issue.getFieldAsString('status') }}</td>
+                <td class="">{{ param_FBSPathBuilder.build(wbselement) }}</td>
+                <td class="">
+                        {{ issue.getFieldAsString('summary') }}
+                </td>
+
+                <!-- WBS -->
+                <td class="newsection">{% if issuetype == "Epic" %}{{ issue.getFieldAsString(param_epiccategoryfield) }}{% endif %}</td>
+                <td class="">
+                    {% set components = issue.getField('components') %}
+                    {% if components is iterable %}{{ components|join(', ',attribute='name') }}{% endif %}
+                </td>
+                <td class=""><a title="{{ issue.getFieldAsString('description')|escape }}">{{ issue.getFieldAsString('description')|truncate(40) }}</a></td>
+
+                <!-- Initial plan -->
+                {# PERT #}
+                {% set perto = issue.getFieldAsString(param_perto_fieldid)|float %}
+                <td class="newsection">{% if perto != 0 %}{{ perto }}{% endif %}</td>
+                {% set pertrm = issue.getFieldAsString(param_pertrm_fieldid)|float %}
+                <td class="">{% if pertrm != 0 %}{{ pertrm }}{% endif %}</td>
+                {% set pertp = issue.getFieldAsString(param_pertp_fieldid)|float %}
+                <td class="">{% if pertp != 0 %}{{ pertp }}{% endif %}</td>
+                <td class="">{% if perto != 0 and pertrm != 0 and pertp != 0 %}{{ "%.2f" % ((perto+pertrm*4+pertp)/6) }}{% endif %}</td>
+
+                {% set original = issue.getFieldAsString('timeoriginalestimate')|float / 60 / 60 %}
+                <td class="">{% if original != 0 %}{{ "%.2f" % original }} hours{% endif %}</td>
+
+                <td class="">{{ issue.getFieldAsString('lastsprint') }}</td>
+                {% set timespent = (issue.getField('timespent')|float / 60 / 60)|float %}
+
+                {% set timespent = (issue.getField('timespent')|float / 60 / 60)|float %}
+                <td class="">{% if timespent != 0 %}{{ "%.2f" % timespent }} hours{% endif %}</td>
+
+                {% set timeestimate = (issue.getField('timeestimate')|float / 60 / 60)|float %}
+                <td class="">{% if timeestimate != 0 %}{{ "%.2f" % timeestimate }} hours{% endif %}</td>
+
+                <!-- Related issues -->
+                <!--<td class="newsection">4 <img class="icon" src="highest.png"/>. 3 <img class="icon" src="higher.png"/>.
+                    2 <img class="icon" src="lower.png"/>. 3 <img class="icon" src="lower.png"/>v
+                </td>
+                <td class="">2 <img class="icon" src="highest.png"/>. 1 <img class="icon" src="lower.png"/></td>
+                <td class="">4 <img class="icon" src="check_nok.png"/>. 2 <img class="icon" src="check_ok.png"/></td>
+                <td class="">3 <img class="icon" src="check_nok.png"/>. 4 <img class="icon" src="check_ok.png"/></td>
+                -->
+                <!-- Calculated Summary -->
+                <!--<td class="newsection">ARC Sprint 19 - CW30-32</td>
+                <td class="">ARC Sprint 23 - CW34-35</td>
+                <td class="">^^</td>
+                <td class="">Analyzed</td>
+                <td class="">1d</td>
+                -->
+                <!-- Checklist -->
+                <!--<td class="newsection"><img class="icon" src="check_warn.png"/></td>
+                <td class=""><img class="icon" src="check_nok.png"/></td>
+                <td class=""><img class="icon" src="check_warn.png"/></td>
+                <td class=""><img class="icon" src="check_nok.png"/></td>
+                -->
+                <!-- Checklist -->
+                <!--<td class="newsection">15 issues</td>
+                <td class="">3 issues</td>
+                <td class="">1 issues</td>
+                <td class="">6 issues</td>
+                <td class="">4 issues</td>
+                <td class="">0 issues</td>
+                <td class="">5 issues</td>
+                <td class="">1 issues</td>
+                -->
+            </tr>
+            {% endfor %}
+            {# WBS Element Row end #}
+
+
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<div>
+</div>
+
+</body>
+</html>

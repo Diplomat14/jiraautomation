@@ -1,0 +1,42 @@
+
+
+
+table {
+   border: 2px solid black;
+   border-spacing: 0px 0px;
+   font-size: 12px;
+}
+
+th, td {
+   padding: 5px;
+   white-space:nowrap;
+}
+
+th {
+   border-bottom: 1px dotted black;
+   background-color: #d8e4bc;
+}
+
+.newsection {
+   border-left: 1px dotted black;
+}
+
+td .icon {
+   height: 12px;
+}
+
+.rowFMG {
+   background-color: #BFBFBF;
+}
+
+.rowFG {
+   background-color: #CFCFCF;
+}
+
+.rowFHLF {
+   background-color: #D9D9D9;
+}
+
+.rowFBS {
+  background-color: #EEE;
+}

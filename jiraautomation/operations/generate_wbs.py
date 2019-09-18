@@ -7,6 +7,8 @@ from xdev.types.complex.tree import tree_type
 from xdev.types.complex.tree import tree_node_type
 from jiraorm.IssueExt import IssueExt
 from jiraorm.EpicExt import EpicExt
+from collections.abc import Iterable
+import yaml
 
 class generate_wbs(basic_operation):
 
@@ -23,6 +25,7 @@ class generate_wbs(basic_operation):
         operation_group.add_argument('-gwbsPERTP', '--generatewbs_PERTP', required=False, help='Name of the PERT Pessimistic Field')
         operation_group.add_argument('-gwbsNWTM', '--generatewbs_NonWBSTypesMapping', required=False,
                                      help='List type mappings and CSS style to use for non non WBS grouping items (like features) in format: <issue_type>=<css_prefix_to_use>{[,<issue_type>=<css_prefix_to_use>]}')
+        operation_group.add_argument('-gwbsC2T', '--generatewbs_Component2Teams', required=False,help='Path to YAML file containing dictionary of component : team mapping')
         pass
 
     @staticmethod
@@ -74,6 +77,11 @@ class generate_wbs(basic_operation):
                 l.msg("Loading template from path %s" % templatepath)
                 loader = FileSystemLoader(templatepath)
 
+
+                c2tmap = {}
+                with open(args.generatewbs_Component2Teams) as f:
+                    c2tmap = yaml.load(f, Loader=yaml.CLoader)
+
                 template = loader.load(env,'wbs.jinja2')
                 return template.render(
                     param_wbslist=resulting_list,
@@ -83,7 +91,8 @@ class generate_wbs(basic_operation):
                     param_perto_fieldid=perto_fieldid,
                     param_pertp_fieldid=pertp_fieldid,
                     param_pertrm_fieldid=pertrm_fieldid,
-                    param_FBSPathBuilder=FBSPathBuilder()
+                    param_FBSPathBuilder=FBSPathBuilder(),
+                    param_ComponentToDomainConverter=ComponentToDomainConverter(c2tmap)
                 )
 
             except Exception as e:
@@ -192,3 +201,15 @@ class FBSPathBuilder(object):
                 return self.__parentToString(parents[level - 1])
             else:
                 return self.__parentsToString(parents[level - 1:])
+
+class ComponentToDomainConverter(object):
+
+    def __init__(self,components_map):
+        self.__components_map = components_map
+
+    def team(self,components):
+        if components is not None and isinstance(components,Iterable):
+            for c in components:
+                if c.name in self.__components_map:
+                    return str(self.__components_map[c.name])
+        return ""

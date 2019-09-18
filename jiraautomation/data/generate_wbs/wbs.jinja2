@@ -13,16 +13,16 @@
             <thead>
             <tr>
                 <!-- FBS -->
-                <th class="" colspan="10">Summary</th>
+                <th class="newsectionnext " colspan="10">Summary</th>
 
                 <!-- WBS -->
-                <th class="newsection" colspan="3">Details</th>
+                <th class="newsectionnext" colspan="4">Details</th>
 
                 <!-- Initial plan -->
-                <th class="newsection" colspan="6">Initial plan</th>
+                <th class="newsectionnext" colspan="6">Initial plan</th>
 
                 <!-- Current plan -->
-                <th class="newsection" colspan="3">Current plan</th>
+                <th class="" colspan="3">Current plan</th>
 
                 <!-- Related issues -->
                 <!--<th class="newsection" colspan="4">Related issues</th>-->
@@ -49,23 +49,24 @@
                 <th class="narrow">FBS Level 2</th>
                 <th class="narrow">FBS Level 3</th>
                 <th class="narrow">FBS Level 4+</th>
-                <th class="wide">FBS/WBS Title</th>
+                <th class="wide newsectionnext">FBS/WBS Title</th>
 
                 <!-- WBS -->
-                <th class="newsection">LOM Relation</th>
-                <th class="">Domain relation</th>
-                <th class="narrow">Description</th>
+                <th class="">LOM Relation</th>
+                <th class="">Team</th>
+                <th class="narrow">Components</th>
+                <th class="narrow newsectionnext">Description</th>
 
                 <!-- Initial plan -->
-                <th class="newsection">PERT Opt</th>
+                <th class="">PERT Opt</th>
                 <th class="">PERT Real</th>
                 <th class="">PERT Pess</th>
                 <th class="">PERT Estimation (calculated)</th>
                 <th class="">Original est.</th>
-                <th class="">Sprint</th>
+                <th class="newsectionnext">Sprint</th>
 
                 <!-- Current plan -->
-                <th class="newsection">Assignee</th>
+                <th class="">Assignee</th>
                 <th class="">Spent time</th>
                 <th class="">Remaining est.</th>
 
@@ -118,12 +119,13 @@
                 <td class="narrow"><a title="{{ param_FBSPathBuilder.parentAsString(wbselement,2,False)|striptags|escape }}">{{ param_FBSPathBuilder.parentAsString(wbselement,2,False)|escape }}</a></td>
                 <td class="narrow"><a title="{{ param_FBSPathBuilder.parentAsString(wbselement,3,False)|striptags|escape }}">{{ param_FBSPathBuilder.parentAsString(wbselement,3,False)|escape }}</a></td>
                 <td class="narrow"><a title="{{ param_FBSPathBuilder.parentAsString(wbselement,4,True)|striptags|escape }}">{{ param_FBSPathBuilder.parentAsString(wbselement,4,True)|escape }}</a></td>
-                <td class="key">{{ issue.getFieldAsString('summary') }}</td>
+                <td class="key newsectionnext">{{ issue.getFieldAsString('summary') }}</td>
 
                 <!-- WBS -->
-                <td class="newsection">{% if issuetype == "Epic" %}{{ issue.getFieldAsString(param_epiccategoryfield) }}{% endif %}</td>
-                <td class="">
-                    {% set components = issue.getField('components') %}
+                <td class="">{% if issuetype == "Epic" %}{{ issue.getFieldAsString(param_epiccategoryfield) }}{% endif %}</td>
+                {% set components = issue.getField('components') %}
+                <td class="">{{ param_ComponentToDomainConverter.team(components) }}</td>
+                <td class="narrow">
                     {% if components is iterable %}{{ components|join(', ',attribute='name') }}{% endif %}
                 </td>
                 <td class="narrow"><a title="{{ issue.getFieldAsString('description')|striptags|escape }}">{{ issue.getFieldAsString('description')|striptags|escape|truncate(40) }}</a></td>
@@ -140,11 +142,11 @@
                 {% set original = issue.getFieldAsString('timeoriginalestimate')|float / 60 / 60 %}
                 <td class="">{% if original != 0 %}{{ "%.2f" % original }} hours{% endif %}</td>
 
-                <td class="">{{ issue.getFieldAsString('lastsprint') }}</td>
+                <td class="newsectionnext">{{ issue.getFieldAsString('lastsprint') }}</td>
                 {% set timespent = (issue.getField('timespent')|float / 60 / 60)|float %}
 
                 <!-- Current plan -->
-                <td class="newsection">{{ issue.getFieldAsString('assignee') }}</td>
+                <td class="">{{ issue.getFieldAsString('assignee') }}</td>
 
                 {% set timespent = (issue.getField('timespent')|float / 60 / 60)|float %}
                 <td class="">{% if timespent != 0 %}{{ "%.2f" % timespent }} hours{% endif %}</td>

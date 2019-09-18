@@ -10,6 +10,7 @@ table {
 th, td {
    padding: 5px;
    white-space:nowrap;
+   border-right: 1px dotted #AAAAAA;
 }
 
 th {
@@ -17,8 +18,19 @@ th {
    background-color: #d8e4bc;
 }
 
-.newsection {
-   border-left: 1px dotted black;
+th.narrow, td.narrow {
+   max-width: 100px;
+   overflow: hidden;
+   white-space: nowrap;
+}
+
+.key {
+   font-weight: bold;
+}
+
+
+.newsectionnext {
+   border-right: 1px solid #777777;
 }
 
 td .icon {

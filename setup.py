@@ -15,7 +15,7 @@ setup(
     author_email='diplomt@gmail.com',
     license='MIT', #TBD
     packages=['jiraautomation'],
-    install_requires=['pyyaml','jiraorm','xdev'],
+    install_requires=['pyyaml','jinja2','jiraorm','xdev'],
     #dependency_links=['http://server/user/repo/tarball/master#egg=package-1.0'],
     entry_points = {
         'console_scripts':['jiraautomation-main=jiraautomation.console.command_line:main']

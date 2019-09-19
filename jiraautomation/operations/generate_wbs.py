@@ -26,6 +26,7 @@ class generate_wbs(basic_operation):
         operation_group.add_argument('-gwbsNWTM', '--generatewbs_NonWBSTypesMapping', required=False,
                                      help='List type mappings and CSS style to use for non non WBS grouping items (like features) in format: <issue_type>=<css_prefix_to_use>{[,<issue_type>=<css_prefix_to_use>]}')
         operation_group.add_argument('-gwbsC2T', '--generatewbs_Component2Teams', required=False,help='Path to YAML file containing dictionary of component : team mapping')
+        operation_group.add_argument('-gwbsExpand', '--generatewbs_ExpandIssues', required=False,help='Specify if epics issues shall be expanded to issues')
         pass
 
     @staticmethod
@@ -69,7 +70,10 @@ class generate_wbs(basic_operation):
                 pertp_fieldid = container.getJIRA().getFieldIDString(pertrname)
                 pertrm_fieldid = container.getJIRA().getFieldIDString(pertpname)
 
-                resulting_list = self.issuesToTree(resulting_tree)
+                expandIssues = False
+                if args.generatewbs_ExpandIssues is not None:
+                    expandIssues = True
+                resulting_list = self.issuesToTree(resulting_tree,expandIssues)
 
                 env = Environment()
 
@@ -105,26 +109,27 @@ class generate_wbs(basic_operation):
     def getDataDirectory(selfs):
         return os.path.dirname(os.path.realpath(__file__))
 
-    def issuesToTree(self,tree):
+    def issuesToTree(self,tree,expandIssues):
         assert isinstance(tree, tree_type), "Tree shall be tree type"
 
         list = []
 
         roots = tree.roots
         for r in roots:
-            self.processNode(r,list)
+            self.processNode(r,list,expandIssues)
 
         return list
 
-    def processNode(self,node,list):
+    def processNode(self,node,list, expandIssues):
         assert isinstance(node, tree_node_type), "Tree node shall be of node type"
 
         list.append(node)
 
-        #self.expandIssues(node)
+        if expandIssues == True:
+            self.expandIssues(node)
 
         for n in node.children:
-            self.processNode(n,list)
+            self.processNode(n,list,expandIssues)
 
 
     def expandIssues(self,node):

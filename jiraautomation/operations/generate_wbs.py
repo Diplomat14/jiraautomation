@@ -82,9 +82,9 @@ class generate_wbs(basic_operation):
                 loader = FileSystemLoader(templatepath)
 
 
-                c2tmap = {}
+
                 with open(args.generatewbs_Component2Teams) as f:
-                    c2tmap = yaml.load(f, Loader=yaml.CLoader)
+                    c2tmap = yaml.load(f, Loader=yaml.Loader)
 
                 template = loader.load(env,'wbs.jinja2')
                 return template.render(
@@ -209,12 +209,13 @@ class FBSPathBuilder(object):
 
 class ComponentToDomainConverter(object):
 
-    def __init__(self,components_map):
-        self.__components_map = components_map
+    def __init__(self, components_map):
+        self.__components_map = dict((v, k) for k in components_map for v in components_map[k])
 
-    def team(self,components):
-        if components is not None and isinstance(components,Iterable):
+    def team(self, components):
+        if components is not None and isinstance(components, Iterable):
             for c in components:
                 if c.name in self.__components_map:
                     return str(self.__components_map[c.name])
+
         return ""

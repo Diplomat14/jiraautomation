@@ -105,58 +105,54 @@
             <tbody>
 
             {# WBS Element Row start #}
-            {% for wbselement in param_wbslist %}
-            {% set issue = wbselement.data %}
-            {% set issuetype = issue.getFieldAsString('issuetype') %}
-            <tr class="row{% if issuetype in param_nonwbstypesmapping %}{{ param_nonwbstypesmapping[issuetype] }}{% else %}{{ 'WBS' }}{% endif %}">
+            {% for issue in param_wbsentry %}
+            {% set issuetype = issue.issuetype%}
+            <tr class="row{% if issuetype in issue.non_wbstypes_mapping %}{{ issue.non_wbstypes_mapping[issuetype] }}{% else %}{{ 'WBS' }}{% endif %}">
                 <!-- FBS -->
                 <td class="narrow">{{ issuetype }}</td>
-                <td class="narrow"><a href="{{ param_serverbase }}/browse/{{ issue.getFieldAsString('key') }}">{{ issue.getFieldAsString('key') }}</a></td>
-                <td class="narrow">{{ issue.getFieldAsString('status') }}</td>
-                <td class="narrow"><a title="{{ param_FBSPathBuilder.level(wbselement)|striptags|escape }}">{{ param_FBSPathBuilder.level(wbselement)|escape }}</a></td>
-                <td class="narrow"><a title="{{ param_FBSPathBuilder.build(wbselement)|striptags|escape }}">{{ param_FBSPathBuilder.build(wbselement)|escape }}</a></td>
-                <td class="narrow"><a title="{{ param_FBSPathBuilder.parentAsString(wbselement,1,False)|striptags|escape }}">{{ param_FBSPathBuilder.parentAsString(wbselement,1,False)|escape }}</a></td>
-                <td class="narrow"><a title="{{ param_FBSPathBuilder.parentAsString(wbselement,2,False)|striptags|escape }}">{{ param_FBSPathBuilder.parentAsString(wbselement,2,False)|escape }}</a></td>
-                <td class="narrow"><a title="{{ param_FBSPathBuilder.parentAsString(wbselement,3,False)|striptags|escape }}">{{ param_FBSPathBuilder.parentAsString(wbselement,3,False)|escape }}</a></td>
-                <td class="narrow"><a title="{{ param_FBSPathBuilder.parentAsString(wbselement,4,True)|striptags|escape }}">{{ param_FBSPathBuilder.parentAsString(wbselement,4,True)|escape }}</a></td>
-                <td class="key newsectionnext">{{ issue.getFieldAsString('summary') }}</td>
+                <td class="narrow"><a href="{{ param_serverbase }}/browse/{{ issue.key }}">{{ issue.key }}</a></td>
+                <td class="narrow">{{ issue.status }}</td>
+                <td class="narrow"><a title="{{ issue.path_builder_level|striptags|escape }}">{{ issue.path_builder_level|escape }}</a></td>
+                <td class="narrow"><a title="{{ issue.path_builder_build|striptags|escape }}">{{ issue.path_builder_build|escape }}</a></td>
+                <td class="narrow"><a title="{{ issue.path_builder_first|striptags|escape }}">{{ issue.path_builder_first|escape }}</a></td>
+                <td class="narrow"><a title="{{ issue.path_builder_second|striptags|escape }}">{{ issue.path_builder_second|escape }}</a></td>
+                <td class="narrow"><a title="{{ issue.path_builder_third|striptags|escape }}">{{ issue.path_builder_third|escape }}</a></td>
+                <td class="narrow"><a title="{{ issue.path_builder_fourth|striptags|escape }}">{{ issue.path_builder_fourth|escape }}</a></td>
+                <td class="key newsectionnext">{{ issue.summary }}</td>
 
                 <!-- WBS -->
-                <td class="">{% if issuetype == "Epic" %}{{ issue.getFieldAsString(param_epiccategoryfield) }}{% endif %}</td>
-                {% set components = issue.getField('components') %}
-                <td class="">{{ param_ComponentToDomainConverter.team(components) }}</td>
-                <td class="narrow">
-                    {% if components is iterable %}{{ components|join(', ',attribute='name') }}{% endif %}
-                </td>
-                <td class="narrow"><a title="{{ issue.getFieldAsString('description')|striptags|escape }}">{{ issue.getFieldAsString('description')|striptags|escape|truncate(40) }}</a></td>
+                <td class="">{% if issuetype == "Epic" %}{{ issue.epic_category }}{% endif %}</td>
+                {% set components = issue.components %}
+                <td class="">{{ issue.team(components) }}</td>
+                <td class="narrow">{{ components }}</td>
+                <td class="narrow"><a title="{{ issue.description|striptags|escape }}">{{ issue.description|striptags|escape|truncate(40) }}</a></td>
 
                 <!-- Initial plan -->
-                {% set perto = issue.getFieldAsString(param_perto_fieldid)|float %}
-                <td class="newsection">{% if perto != 0 %}{{ perto }}{% endif %}</td>
-                {% set pertrm = issue.getFieldAsString(param_pertrm_fieldid)|float %}
-                <td class="">{% if pertrm != 0 %}{{ pertrm }}{% endif %}</td>
-                {% set pertp = issue.getFieldAsString(param_pertp_fieldid)|float %}
-                <td class="">{% if pertp != 0 %}{{ pertp }}{% endif %}</td>
-                <td class="">{% if perto != 0 and pertrm != 0 and pertp != 0 %}{{ "%.2f" % ((perto+pertrm*4+pertp)/6) }}{% endif %}</td>
+                {% set perto = issue.perto %}
+                <td class="newsection">{% if perto != None %}{{ perto }}{% endif %}</td>
+                {% set pertrm = issue.pertrm %}
+                <td class="">{% if pertrm != None %}{{ pertrm }}{% endif %}</td>
+                {% set pertp = issue.pertp %}
+                <td class="">{% if pertp != None %}{{ pertp }}{% endif %}</td>
+                <td class="">{% if issue.pert_calculated  != None %}{{ issue.pert_calculated }}{% endif %}</td>
 
-                {% set original = issue.getFieldAsString('timeoriginalestimate')|float / 60 / 60 %}
-                <td class="">{% if original != 0 %}{{ "%.2f" % original }} hours{% endif %}</td>
+                {% set original = issue.original %}
+                <td class="">{% if original != None %}{{ issue.original/60/60 }} {% endif %}</td>
 
-                <td class="newsectionnext">{{ issue.getFieldAsString('lastsprint') }}</td>
-                {% set timespent = (issue.getField('timespent')|float / 60 / 60)|float %}
+                <td class="newsectionnext">{{ issue.lastsprint}}</td>
 
                 <!-- Current plan -->
-                <td class="">{{ issue.getFieldAsString('assignee') }}</td>
+                <td class="">{{ issue.assignee }}</td>
 
-                {% set timespent = (issue.getField('timespent')|float / 60 / 60)|float %}
-                <td class="">{% if timespent != 0 %}{{ "%.2f" % timespent }} hours{% endif %}</td>
+                {% set timespent = issue.timespent %}
+                <td class="">{% if timespent != None %}{{ issue.timespent/60/60 }} hours{% endif %}</td>
 
-                {% set timeestimate = (issue.getField('timeestimate')|float / 60 / 60)|float %}
-                <td class="">{% if timeestimate != 0 %}{{ "%.2f" % timeestimate }} hours{% endif %}</td>
+                {% set timeestimate = issue.timeestimate %}
+                <td class="">{% if timeestimate != None %}{{ issue.timeestimate/60/60 }} hours{% endif %}</td>
 
                 <!-- Related issues -->
                 <!--<td class="newsection">4 <img class="icon" src="highest.png"/>. 3 <img class="icon" src="higher.png"/>.
-                    2 <img class="icon" src="lower.png"/>. 3 <img class="icon" src="lower.png"/>v
+                    2 <img class="icon" src="lower.png"/>. 3 <img class="icon" src="lower.png"/>
                 </td>
                 <td class="">2 <img class="icon" src="highest.png"/>. 1 <img class="icon" src="lower.png"/></td>
                 <td class="">4 <img class="icon" src="check_nok.png"/>. 2 <img class="icon" src="check_ok.png"/></td>
@@ -186,9 +182,8 @@
                 <td class="">1 issues</td>
                 -->
             </tr>
-            {% endfor %}
             {# WBS Element Row end #}
-
+            {% endfor %}
 
             </tbody>
         </table>

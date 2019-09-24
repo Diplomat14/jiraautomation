@@ -41,7 +41,7 @@ class basic_operation(object):
 
     def __init__(self,iLogger:logger):
         assert isinstance(iLogger,logger)
-        self.__logger = iLogger
+        self.__logger = logger.from_parent(self.name(),iLogger)
 
     @property
     def logger(self):

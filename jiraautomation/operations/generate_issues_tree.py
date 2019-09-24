@@ -99,6 +99,7 @@ def convertissues_to_graph(issues, l, c):
     global root_for_not_processed
     global startingnodes
     global startingnodestype
+    l.msg("Starting issues to graph convertion")
 
     graph = graph_type(l)
     id_to_node_map = {}
@@ -147,6 +148,7 @@ def convertissues_to_graph(issues, l, c):
             else:
                 l.warning("   Unknown link direction")
 
+    l.msg("Issues to graph convertion finished")
     return graph
 
 def issue_to_str(issue):

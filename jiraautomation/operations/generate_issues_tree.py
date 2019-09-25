@@ -6,13 +6,9 @@ from xdev.types.complex.tree import tree_type
 from xdev.types.complex.tree import tree_node_type
 from xdev.types.algorithms.graph_to_tree_converter import conversionrules
 from xdev.types.algorithms.graph_to_tree_converter import  graph_to_tree_converter
-from jiraorm.EpicExt import EpicExt
 
 startingnodes = []
-root_for_not_processed_key = "ARCREATOR-6205"
 root_for_not_processed = None
-startingnodestype = "Feature Group"
-linkrule = "Consists of"
 
 class generate_issues_tree(basic_operation):
 
@@ -22,8 +18,12 @@ class generate_issues_tree(basic_operation):
 
     @staticmethod
     def init_arguments(operation_group):
-        #operation_group.add_argument('-lbNP', '--listboards_namepart', required=False,
-        #                                  help='Part of the name to use as a filter searching for boards')
+        operation_group.add_argument('-rfnpk', '--genisstree_NotProcessedKey', required=True,
+                                     help='Root for not processed key')
+        operation_group.add_argument('-sntype', '--genisstree_StartNodeType', required=True,
+                                     help='Type of starting node')
+        operation_group.add_argument('-lkrule', '--genisstree_LinkRule', required=True,
+                                     help='Link of rule')
         pass
 
     @staticmethod
@@ -42,15 +42,18 @@ class generate_issues_tree(basic_operation):
             jira = container.getJIRA()
 
             try:
+                root_for_not_processed_key = args.genisstree_NotProcessedKey
+                startingnodestype = args.genisstree_StartNodeType
+                linkrule = args.genisstree_LinkRule
                 top_request_query = args.query
                 l.msg("Requesting issues by query: %s" % top_request_query)
                 issues = jira.search_issues_nolim(top_request_query,maxResults=None)
                 l.msg(str(len(issues)) + " issues found")
 
-                graph = convertissues_to_graph(issues,l,container)
+                graph = convertissues_to_graph(issues,l,container,root_for_not_processed_key, startingnodestype)
                 starting_nodes = getstartingnodes(graph)
                 graph_root_for_not_processed_data = get_root_for_not_processed()
-                rules = getrules()
+                rules = getrules(linkrule)
 
                 l.msg("Outputting graph")
                 print_grah(graph, l)
@@ -83,8 +86,7 @@ def get_root_for_not_processed():
     global root_for_not_processed
     return root_for_not_processed
 
-def getrules():
-    global linkrule
+def getrules(linkrule):
     rules = conversionrules()
     rules.add_link_rule(linkrule)
 
@@ -95,10 +97,9 @@ def getrules():
 #######################################################################################
 
 
-def convertissues_to_graph(issues, l, c):
+def convertissues_to_graph(issues, l, c, root_for_not_processed_key, startingnodestype):
     global root_for_not_processed
     global startingnodes
-    global startingnodestype
     l.msg("Starting issues to graph convertion")
 
     graph = graph_type(l)

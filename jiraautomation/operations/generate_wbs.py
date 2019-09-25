@@ -270,20 +270,17 @@ class WBS_Entry(object):
     @property
     # In seconds
     def timeestimate(self):
-        tes = self.__tree_node.data.getField('timeestimate')
-        return "{:.2f}".format(float(tes)) if tes is not None else None
+        return self.__tree_node.data.getField('timeestimate')
 
     @property
     # In seconds
     def timespent(self):
-        ts = self.__tree_node.data.getField('timespent')
-        return "{:.2f}".format(float(ts)) if ts is not None else None
+        return self.__tree_node.data.getField('timespent')
 
     @property
     # In seconds
     def original(self):
-        orig = self.__tree_node.data.getFieldAsString('timeoriginalestimate')
-        return "{:.2f}".format(float(orig)) if orig is not "" else None
+        return self.__tree_node.data.getFieldAsString('timeoriginalestimate')
 
     def team(self,components):
         return self.__c2dconverter.team(components)

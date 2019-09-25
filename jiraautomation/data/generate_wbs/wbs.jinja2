@@ -136,19 +136,19 @@
                 <td class="">{% if pertp != None %}{{ pertp }}{% endif %}</td>
                 <td class="">{% if issue.pert_calculated  != None %}{{ issue.pert_calculated }}{% endif %}</td>
 
-                {% set original = issue.original %}
-                <td class="">{% if original != None %}{{ issue.original|int/60/60 }} {% endif %}</td>
+                {% set original = issue.original|float / 60 / 60 %}
+                <td class="">{% if original != 0 %}{{ "%.2f" % original }} hours{% endif %}</td>
 
                 <td class="newsectionnext">{{ issue.lastsprint}}</td>
 
                 <!-- Current plan -->
                 <td class="">{{ issue.assignee }}</td>
 
-                {% set timespent = issue.timespent %}
-                <td class="">{% if timespent != None %}{{ issue.timespent|int/60/60 }} hours{% endif %}</td>
+                {% set timespent = issue.timespent|float / 60 / 60 %}
+                <td class="">{% if timespent != 0 %}{{ "%.2f" % timespent }} hours{% endif %}</td>
 
-                {% set timeestimate = issue.timeestimate %}
-                <td class="">{% if timeestimate != None %}{{ issue.timeestimate|int/60/60 }} hours{% endif %}</td>
+                {% set timeestimate = issue.timeestimate|float / 60 / 60 %}
+                <td class="">{% if timeestimate != 0 %}{{ "%.2f" % timeestimate }} hours{% endif %}</td>
 
                 <!-- Related issues -->
                 <!--<td class="newsection">4 <img class="icon" src="highest.png"/>. 3 <img class="icon" src="higher.png"/>.

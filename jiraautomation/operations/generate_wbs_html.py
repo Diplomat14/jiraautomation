@@ -43,7 +43,8 @@ class generate_wbs_html(basic_operation):
                 loader = FileSystemLoader(templatepath)
 
                 template = loader.load(env, 'wbs.jinja2')
-                return template.render(param_wbsentry=param_wbsentry)
+                return template.render(param_wbsentry=param_wbsentry,
+                                       param_serverbase=container.connectionConfig.server)
 
 
             except Exception as e:

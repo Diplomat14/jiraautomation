@@ -18,11 +18,11 @@ class generate_issues_tree(basic_operation):
 
     @staticmethod
     def init_arguments(operation_group):
-        operation_group.add_argument('-rfnpk', '--genisstree_NotProcessedKey', required=True,
+        operation_group.add_argument('-rfnpk', '--genisstree_NotProcessedKey', required=False,
                                      help='Root for not processed key')
-        operation_group.add_argument('-sntype', '--genisstree_StartNodeType', required=True,
+        operation_group.add_argument('-sntype', '--genisstree_StartNodeType', required=False,
                                      help='Type of starting node')
-        operation_group.add_argument('-lkrule', '--genisstree_LinkRule', required=True,
+        operation_group.add_argument('-lkrule', '--genisstree_LinkRule', required=False,
                                      help='Link of rule')
         pass
 

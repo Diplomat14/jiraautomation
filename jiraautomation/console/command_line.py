@@ -27,18 +27,15 @@ def main():
         try:
             l.msg("Operation %s" % str(args.operation))
 
-            container = None
+            container = jiraorm.console.command_line.create_container(l,args)
             output = None
-
-            # TODO: If need to connect
-            container = jiraorm.console.command_line.operation_connect(l,args)
 
             found = False
             ops = automationcore.get_operations()
             for op in ops.values():
                 if args.operation == op.name():
                     found = True
-                    op_instance = op(l)
+                    op_instance = op(l)                    
                     output = op_instance.execute(container, args)
             if found == False:
                 l.warning("Operation %s not implemented" % str(args.operation))
@@ -48,10 +45,10 @@ def main():
                     return f.write(str(output))
 
         except Exception as e:
-            l.error("Exception happened during operation processing: " + str(e), e)
+            l.error("Exception happened during operation processing", e)
 
     except Exception as e:
-        l.error("Exception on commandline arguments parsing: " + str(e),e)
+        l.error("Exception on commandline arguments parsing",e)
 
 
     l.msg("Command line tool finished")

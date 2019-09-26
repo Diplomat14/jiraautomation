@@ -32,6 +32,8 @@ class generate_wbs(basic_operation):
                                      help='Path to YAML file containing dictionary of component : team mapping')
         operation_group.add_argument('-gwbsExpand', '--generatewbs_ExpandIssues', required=False,
                                      help='Specify if epics issues shall be expanded to issues')
+        operation_group.add_argument('-gwbswt', '--generatewbs_WBSTypes', required=False,
+                                     help='Types that could possibly be shown in FBS Level 4+')
         pass
 
     @staticmethod
@@ -81,7 +83,7 @@ class generate_wbs(basic_operation):
                 issues_list = self.issuesToTree(resulting_tree, expandIssues)
 
                 entry_list = list()
-                fbspathbuilder = FBSPathBuilder()
+                fbspathbuilder = FBSPathBuilder(args.generatewbs_WBSTypes)
                 c2tconverter = ComponentToDomainConverter(c2tmap)
                 for issue in issues_list:
                     entry_list.append(
@@ -134,8 +136,9 @@ class generate_wbs(basic_operation):
 
 class FBSPathBuilder(object):
 
-    def __init__(self, field='summary', separator=' / '):
+    def __init__(self, wbs_types, field='summary', separator=' / '):
         self.__separator = separator
+        self.__wbs_types = wbs_types
         self.__field = field
         self.__cache = {}
 
@@ -169,7 +172,8 @@ class FBSPathBuilder(object):
         return path
 
     def __parentToString(self, parent):
-        return parent.data.getFieldAsString(self.__field)
+        return parent.data.getFieldAsString(self.__field) if parent.data.getFieldAsString(
+            'issuetype') in self.__wbs_types.split(',') else ""
 
     def level(self, node_tree):
         if node_tree not in self.__cache:
@@ -195,11 +199,13 @@ class FBSPathBuilder(object):
             if all_remaining == False:
                 return self.__parentToString(parents[level - 1])
             else:
+
                 return self.__parentsToString(parents[level - 1:])
 
 
 class WBS_Entry(object):
-    def __init__(self, tree_node, perto_fieldid, pertrm_fieldid, pertp_fieldid, epiccategoryfield, c2dconverter, nonwbstypesmapping, fbspathbuilder):
+    def __init__(self, tree_node, perto_fieldid, pertrm_fieldid, pertp_fieldid, epiccategoryfield, c2dconverter,
+                 nonwbstypesmapping, fbspathbuilder):
         self.__tree_node = tree_node
         self.__perto_fieldid = perto_fieldid
         self.__pertrm_fieldid = pertrm_fieldid
@@ -259,6 +265,11 @@ class WBS_Entry(object):
         return self.__tree_node.data.getFieldAsString('lastsprint')
 
     @property
+    def sprints(self):
+        all_sprints = self.__tree_node.data.getField('sprints')
+        return ", ".join(c.name for c in all_sprints) if isinstance(all_sprints, Iterable) else ""
+
+    @property
     def status(self):
         return self.__tree_node.data.getFieldAsString('status')
 
@@ -311,6 +322,11 @@ class WBS_Entry(object):
     @property
     def non_wbstypes_mapping(self):
         return self.__nonwbstypesmapping
+
+    @property
+    def parent_id(self):
+        return self.__tree_node.parent.data.getFieldAsString('key')
+
 
 class ComponentToDomainConverter(object):
 

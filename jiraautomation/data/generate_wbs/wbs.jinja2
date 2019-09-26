@@ -22,7 +22,10 @@
                 <th class="newsectionnext" colspan="6">Initial plan</th>
 
                 <!-- Current plan -->
-                <th class="" colspan="3">Current plan</th>
+                <th class="newsectionnext" colspan="3">Current plan</th>
+
+                <!-- Additional Info -->
+                <th class="" colspan="2">Additional Info</th>
 
                 <!-- Related issues -->
                 <!--<th class="newsection" colspan="4">Related issues</th>-->
@@ -68,7 +71,11 @@
                 <!-- Current plan -->
                 <th class="">Assignee</th>
                 <th class="">Spent time</th>
-                <th class="">Remaining est.</th>
+                <th class="newsectionnext">Remaining est.</th>
+
+                <!-- Additional info -->
+                <th class="">Parent Id</th>
+                <th class="">All sprints</th>
 
                 <!-- Related issues -->
                 <!--<th class="newsection">Risks</th>
@@ -148,7 +155,11 @@
                 <td class="">{% if timespent != 0 %}{{ "%.2f" % timespent }} hours{% endif %}</td>
 
                 {% set timeestimate = issue.timeestimate|float / 60 / 60 %}
-                <td class="">{% if timeestimate != 0 %}{{ "%.2f" % timeestimate }} hours{% endif %}</td>
+                <td class="newsectionnext">{% if timeestimate != 0 %}{{ "%.2f" % timeestimate }} hours{% endif %}</td>
+
+                <!-- Additional info -->
+                <td class=""><a href="{{ param_serverbase }}/browse/{{ issue.parent_id }}">{{ issue.parent_id }}</a></td>
+                <td class="">{{ issue.sprints }}</td>
 
                 <!-- Related issues -->
                 <!--<td class="newsection">4 <img class="icon" src="highest.png"/>. 3 <img class="icon" src="higher.png"/>.

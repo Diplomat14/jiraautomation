@@ -141,7 +141,7 @@
                 <td class="">{% if pertrm != None %}{{ pertrm }}{% endif %}</td>
                 {% set pertp = issue.pertp %}
                 <td class="">{% if pertp != None %}{{ pertp }}{% endif %}</td>
-                <td class="">{% if issue.pert_calculated  != None %}{{ issue.pert_calculated }}{% endif %}</td>
+                <td class="">{% if issue.pert_calculated  != None %}{{ "%.2f" % issue.pert_calculated }}{% endif %}</td>
 
                 {% set original = issue.original|float / 60 / 60 %}
                 <td class="">{% if original != 0 %}{{ "%.2f" % original }} hours{% endif %}</td>

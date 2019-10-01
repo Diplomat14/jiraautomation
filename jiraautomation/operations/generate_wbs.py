@@ -233,7 +233,7 @@ class WBS_Entry(object):
     @property
     def pert_calculated(self):
         if self.perto is not None and self.pertrm is not None and self.pertp is not None:
-            return "{:.2f}".format((self.perto+(self.pertrm*4)+self.pertp)/6)
+            return (self.perto+(self.pertrm*4)+self.pertp)/6
 
     @property
     def epic_category(self):
@@ -290,7 +290,7 @@ class WBS_Entry(object):
     @property
     # In seconds
     def original(self):
-        return self.__tree_node.data.getFieldAsString('timeoriginalestimate')
+        return self.__tree_node.data.getField('timeoriginalestimate')
 
     def team(self,components):
         return self.__c2dconverter.team(components)

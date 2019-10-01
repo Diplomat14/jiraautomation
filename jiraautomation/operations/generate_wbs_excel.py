@@ -51,7 +51,6 @@ class generate_wbs_excel(basic_operation):
 
 
 def calculated_cols(df):
-    df['Original est.'] = df['Original est.'][df['Original est.'] != ''].astype(int)
     df['Original hours'] = df['Original est.'] / 3600
     df['Original days'] = df['Original hours'] / 8
     df['Spent hours'] = df['Spent time'] / 3600

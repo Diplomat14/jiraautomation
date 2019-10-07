@@ -6,7 +6,6 @@ from xdev.types.complex.tree import tree_node_type
 from jiraorm.IssueExt import IssueExt
 from jiraorm.EpicExt import EpicExt
 from collections.abc import Iterable
-import yaml
 
 
 class generate_wbs(basic_operation):
@@ -28,8 +27,6 @@ class generate_wbs(basic_operation):
                                      help='Name of the PERT Pessimistic Field')
         operation_group.add_argument('-gwbsNWTM', '--generatewbs_NonWBSTypesMapping', required=False,
                                      help='List type mappings and CSS style to use for non non WBS grouping items (like features) in format: <issue_type>=<css_prefix_to_use>{[,<issue_type>=<css_prefix_to_use>]}')
-        operation_group.add_argument('-gwbsC2T', '--generatewbs_Component2Teams', required=False,
-                                     help='Path to YAML file containing dictionary of component : team mapping')
         operation_group.add_argument('-gwbsExpand', '--generatewbs_ExpandIssues', required=False,
                                      help='Specify if epics issues shall be expanded to issues')
         operation_group.add_argument('-gwbswt', '--generatewbs_WBSTypes', required=False,
@@ -69,9 +66,6 @@ class generate_wbs(basic_operation):
                 pertp_fieldid = container.getJIRA().getFieldIDString(args.generatewbs_PERTP)
                 pertrm_fieldid = container.getJIRA().getFieldIDString(args.generatewbs_PERTR)
 
-                with open(args.generatewbs_Component2Teams) as f:
-                    c2tmap = yaml.load(f, Loader=yaml.Loader)
-
                 # Generating hierarchy tree
                 op = generate_issues_tree(l)
                 resulting_tree = op.execute(container, args)
@@ -84,10 +78,9 @@ class generate_wbs(basic_operation):
 
                 entry_list = list()
                 fbspathbuilder = FBSPathBuilder(args.generatewbs_WBSTypes)
-                c2tconverter = ComponentToDomainConverter(c2tmap)
                 for issue in issues_list:
                     entry_list.append(
-                        WBS_Entry(issue, perto_fieldid, pertrm_fieldid, pertp_fieldid, epiccategoryfield, c2tconverter,
+                        WBS_Entry(issue, perto_fieldid, pertrm_fieldid, pertp_fieldid, epiccategoryfield,
                                   nonwbstypesmapping,fbspathbuilder))
 
                 return entry_list
@@ -204,7 +197,7 @@ class FBSPathBuilder(object):
 
 
 class WBS_Entry(object):
-    def __init__(self, tree_node, perto_fieldid, pertrm_fieldid, pertp_fieldid, epiccategoryfield, c2dconverter,
+    def __init__(self, tree_node, perto_fieldid, pertrm_fieldid, pertp_fieldid, epiccategoryfield,
                  nonwbstypesmapping, fbspathbuilder):
         self.__tree_node = tree_node
         self.__perto_fieldid = perto_fieldid
@@ -213,7 +206,6 @@ class WBS_Entry(object):
         self.__epiccategoryfield = epiccategoryfield
         self.__nonwbstypesmapping = nonwbstypesmapping
         self.__fbspathbuilder = fbspathbuilder
-        self.__c2dconverter = c2dconverter
 
     @property
     def perto(self):
@@ -292,9 +284,6 @@ class WBS_Entry(object):
     def original(self):
         return self.__tree_node.data.getField('timeoriginalestimate')
 
-    def team(self,components):
-        return self.__c2dconverter.team(components)
-
     @property
     def path_builder_level(self):
         return self.__fbspathbuilder.level(self.__tree_node)
@@ -326,17 +315,3 @@ class WBS_Entry(object):
     @property
     def parent_id(self):
         return self.__tree_node.parent.data.getFieldAsString('key')
-
-
-class ComponentToDomainConverter(object):
-
-    def __init__(self, components_map):
-        self.__components_map = dict((v, k) for k in components_map for v in components_map[k])
-
-    def team(self, components):
-        if components is not None:
-            for c in components.split():
-                if c in self.__components_map:
-                    return str(self.__components_map[c])
-
-        return ""

@@ -16,7 +16,7 @@
                 <th class="newsectionnext " colspan="10">Summary</th>
 
                 <!-- WBS -->
-                <th class="newsectionnext" colspan="4">Details</th>
+                <th class="newsectionnext" colspan="3">Details</th>
 
                 <!-- Initial plan -->
                 <th class="newsectionnext" colspan="6">Initial plan</th>
@@ -57,7 +57,6 @@
                 <!-- WBS -->
                 <th class="">LOM Relation</th>
                 <th class="">Team</th>
-                <th class="narrow">Components</th>
                 <th class="narrow newsectionnext">Description</th>
 
                 <!-- Initial plan -->
@@ -129,9 +128,7 @@
 
                 <!-- WBS -->
                 <td class="">{% if issuetype == "Epic" %}{{ issue.epic_category }}{% endif %}</td>
-                {% set components = issue.components %}
-                <td class="">{{ issue.team(components) }}</td>
-                <td class="narrow">{{ components }}</td>
+                <td class="narrow">{{ issue.components }}</td>
                 <td class="narrow"><a title="{{ issue.description|striptags|escape }}">{{ issue.description|striptags|escape|truncate(40) }}</a></td>
 
                 <!-- Initial plan -->

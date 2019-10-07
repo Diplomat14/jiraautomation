@@ -2,10 +2,6 @@ from jiraautomation.operations.operation import basic_operation
 from jinja2.loaders import FileSystemLoader
 from jinja2.environment import Environment
 from .generate_wbs import generate_wbs
-from .generate_wbs import WBS_Entry
-from .generate_wbs import FBSPathBuilder
-from .generate_wbs import ComponentToDomainConverter
-import yaml
 import os
 
 

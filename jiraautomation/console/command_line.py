@@ -55,7 +55,7 @@ def main():
 
 
 def init_arguments():
-    parser = argparse.ArgumentParser(description='JIRA Automation Command Line tool')
+    parser = argparse.ArgumentParser(description='JIRA Automation Command Line tool', fromfile_prefix_chars='@')
 
     # Reusing common arguments (like server, user, log, output, etc.) from orm console
     jiraorm.console.command_line.init_common_arguments(parser)

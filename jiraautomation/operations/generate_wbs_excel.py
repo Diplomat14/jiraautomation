@@ -39,10 +39,12 @@ class generate_wbs_excel(basic_operation):
                 with open(args.generatewbs_sprints2fcs) as f:
                     fcs_sprints = yaml.load(f, Loader=yaml.Loader)
 
-                full_df = calculated_cols(df)
-                fcs = sprints_mapping(full_df, fcs_sprints)
+                expanded_df = calculated_cols(df)
+                final_df = remove_pert_from_duplicates(expanded_df)
 
-                save_data_to_excel(args.output, full_df, fcs)
+                fcs = sprints_mapping(final_df, fcs_sprints)
+
+                save_data_to_excel(args.output, final_df, fcs)
 
             except Exception as e:
                 l.error("Exception happened boards search " + str(e), e)
@@ -62,13 +64,6 @@ def calculated_cols(df):
     return df
 
 
-def create_pivot(df):
-    pivot = pd.pivot_table(df, index=["Sprint"], values=["PERT Estimation (calculated)"], columns=["Team"],
-                           aggfunc=[np.sum], fill_value=0)
-
-    return pivot
-
-
 def sprints_mapping(df, FC_sprints):
     FC_reverse = dict((v, k) for k in FC_sprints for v in FC_sprints[k])
 
@@ -77,13 +72,30 @@ def sprints_mapping(df, FC_sprints):
     return fcs
 
 
+def remove_pert_from_duplicates(df):
+    df.loc[df.duplicated(subset=['ID']), ['PERT Opt', 'PERT Estimation (calculated)', "PERT Real",
+                                                    "PERT Pess", "PERT Estimation (calculated)"]] = np.nan
+    return df
+
+
 def save_data_to_excel(file, data, fcs):
     with pd.ExcelWriter(file, engine='openpyxl') as writer:
         writer.book = load_workbook(file)
         writer.sheets = dict((ws.title, ws) for ws in writer.book.worksheets)
 
         for fc in fcs:
+            fc_to_pi = {'FC2': 'PI04', 'FC3': 'PI05', 'FC4': 'PI06'}
+            if fc not in writer.book.sheetnames:
+                sheet = fc_to_pi.get(fc)
+                writer.sheet = writer.book.get_sheet_by_name(sheet)
+            else:
+                sheet = fc
+                writer.sheet = writer.book.get_sheet_by_name(sheet)
+            for row in writer.sheet:
+                if row:
+                    for cell in row:
+                        cell.value = None
+
             fc_data = data[data['Stages'] == fc]
-            fc_data.to_excel(writer, sheet_name=fc, index=False)
-            pivot_table = create_pivot(fc_data)
-            pivot_table.to_excel(writer, sheet_name=fc + '_Domain_View')
+            fc_data = fc_data[fc_data.columns[:-1]]
+            fc_data.to_excel(writer, sheet_name=sheet, index=False)

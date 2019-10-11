@@ -40,7 +40,8 @@ class generate_wbs_excel(basic_operation):
                     fcs_sprints = yaml.load(f, Loader=yaml.Loader)
 
                 expanded_df = calculated_cols(df)
-                final_df = remove_pert_from_duplicates(expanded_df)
+                df_with_links = id_as_link(expanded_df)
+                final_df = remove_pert_from_duplicates(df_with_links)
 
                 fcs = sprints_mapping(final_df, fcs_sprints)
 
@@ -74,7 +75,12 @@ def sprints_mapping(df, FC_sprints):
 
 def remove_pert_from_duplicates(df):
     df.loc[df.duplicated(subset=['ID']), ['PERT Opt', 'PERT Estimation (calculated)', "PERT Real",
-                                                    "PERT Pess", "PERT Estimation (calculated)"]] = np.nan
+                                          "PERT Pess", "PERT Estimation (calculated)"]] = np.nan
+    return df
+
+
+def id_as_link(df):
+    df['ID'] = df['ID'].apply(lambda x: '=HYPERLINK("https://drivings.atlassian.net/browse/{}", "{}")'.format(x, x))
     return df
 
 
@@ -87,10 +93,9 @@ def save_data_to_excel(file, data, fcs):
             fc_to_pi = {'FC2': 'PI04', 'FC3': 'PI05', 'FC4': 'PI06'}
             if fc not in writer.book.sheetnames:
                 sheet = fc_to_pi.get(fc)
-                writer.sheet = writer.book.get_sheet_by_name(sheet)
             else:
                 sheet = fc
-                writer.sheet = writer.book.get_sheet_by_name(sheet)
+            writer.sheet = writer.book.get_sheet_by_name(sheet)
             for row in writer.sheet:
                 if row:
                     for cell in row:

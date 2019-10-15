@@ -41,6 +41,7 @@ class generate_wbs_excel(basic_operation):
 
                 expanded_df = calculated_cols(df)
                 df_with_links = id_as_link(expanded_df)
+
                 final_df = remove_pert_from_duplicates(df_with_links)
 
                 fcs = sprints_mapping(final_df, fcs_sprints)
@@ -83,7 +84,6 @@ def id_as_link(df):
     df['ID'] = df['ID'].apply(lambda x: '=HYPERLINK("https://drivings.atlassian.net/browse/{}", "{}")'.format(x, x))
     return df
 
-
 def save_data_to_excel(file, data, fcs):
     with pd.ExcelWriter(file, engine='openpyxl') as writer:
         writer.book = load_workbook(file)
@@ -102,5 +102,5 @@ def save_data_to_excel(file, data, fcs):
                         cell.value = None
 
             fc_data = data[data['Stages'] == fc]
-            fc_data = fc_data[fc_data.columns[:-1]]
+            fc_data = fc_data[fqc_data.columns[:-1]]
             fc_data.to_excel(writer, sheet_name=sheet, index=False)

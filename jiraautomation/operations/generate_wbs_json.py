@@ -41,7 +41,7 @@ class generate_wbs_json(basic_operation):
                            d.path_builder_first, d.path_builder_second, d.path_builder_third, d.path_builder_fourth,
                            d.summary, d.epic_category, d.components,
                            d.description, d.perto, d.pertrm, d.pertp, d.pert_calculated,
-                           d.original, d.lastsprint, d.assignee, d.timespent, d.timeestimate]
+                           d.original, d.firstsprint, d.assignee, d.timespent, d.timeestimate]
 
                     d = dict(zip(keys, values))
                     to_json.append(d)

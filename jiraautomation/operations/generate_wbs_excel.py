@@ -102,5 +102,5 @@ def save_data_to_excel(file, data, fcs):
                         cell.value = None
 
             fc_data = data[data['Stages'] == fc]
-            fc_data = fc_data[fqc_data.columns[:-1]]
+            fc_data = fc_data[fc_data.columns[:-1]]
             fc_data.to_excel(writer, sheet_name=sheet, index=False)

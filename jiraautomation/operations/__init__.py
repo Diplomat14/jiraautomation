@@ -11,6 +11,7 @@ from .generate_wbs_html import generate_wbs_html
 from .generate_wbs_json import generate_wbs_json
 from .generate_issues_tree import generate_issues_tree
 from .generate_wbs_excel import generate_wbs_excel
+from .get_files_from_sharepoint import get_files_from_sharepoint
 
 register = operations_register()
 
@@ -25,3 +26,4 @@ register.register(generate_wbs_html)
 register.register(generate_wbs_json)
 register.register(generate_issues_tree)
 register.register(generate_wbs_excel)
+register.register(get_files_from_sharepoint)

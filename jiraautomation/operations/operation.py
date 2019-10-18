@@ -1,15 +1,48 @@
 from xdev.core.logger import logger
 from enum import Enum
+import importlib
 
 class operations_register(object):
 
     def __init__(self):
-        self.__operations = []
+        self.__operations = {}
+        self.__operation_names = []
+        self.__dynamic_operations = {}
 
     def register(self,operation):
         assert isinstance(operation,type), "operation has to be a child of basic_operation type"
         if operation not in self.__operations:
-            self.__operations.append(operation)
+            self.__operations[operation.name()] = operation
+            self.__operation_names.append(operation.name())
+
+    def register_dynamic(self,user_name,class_name,module_path,package_path):
+        self.__dynamic_operations[user_name] = {}
+        self.__dynamic_operations[user_name]['class'] = class_name
+        self.__dynamic_operations[user_name]['module'] = module_path
+        self.__dynamic_operations[user_name]['package'] = package_path
+        self.__dynamic_operations[user_name]['loaded'] = False
+        self.__operation_names.append(user_name)
+
+    def __load_operation(self,name):
+        mod = importlib.import_module(self.__dynamic_operations[name]['module'],self.__dynamic_operations[name]['package'])
+        self.__dynamic_operations[name]['loaded'] = True
+        return getattr(mod,self.__dynamic_operations[name]['class'])
+
+    def is_operation_loaded(self, name):
+        if name in self.__dynamic_operations:
+            return self.__dynamic_operations[name]['loaded']
+        else:
+            return True
+
+    def get_operation_class(self, name):
+        if name in self.__dynamic_operations:
+            return self.__load_operation(name)
+        else:
+            return self.__operations[name]
+
+    @property
+    def operation_names(self):
+        return self.__operation_names
 
     @property
     def operations(self):

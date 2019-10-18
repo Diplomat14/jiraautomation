@@ -1,29 +1,17 @@
 
 from .operation import operations_register
-from .list_boards_operation import list_boards_operation
-from .convert_linktofield_operation import linktofield_operation
-from .planning_report_persprint_operation import planning_report_persprint_operation
-from .planning_report_persprint_operation2 import planning_report_persprint_operation2
-from .set_due_by_sprint import set_due_by_sprint
-from .export_issues_as_json import export_issues_as_json
-from .generate_wbs import generate_wbs
-from .generate_wbs_html import generate_wbs_html
-from .generate_wbs_json import generate_wbs_json
-from .generate_issues_tree import generate_issues_tree
-from .generate_wbs_excel import generate_wbs_excel
-from .get_files_from_sharepoint import get_files_from_sharepoint
 
 register = operations_register()
 
-register.register(list_boards_operation)
-register.register(linktofield_operation)
-register.register(planning_report_persprint_operation)
-register.register(planning_report_persprint_operation2)
-register.register(set_due_by_sprint)
-register.register(export_issues_as_json)
-register.register(generate_wbs)
-register.register(generate_wbs_html)
-register.register(generate_wbs_json)
-register.register(generate_issues_tree)
-register.register(generate_wbs_excel)
-register.register(get_files_from_sharepoint)
+register.register_dynamic('ListBoards','list_boards_operation','.list_boards_operation','jiraautomation.operations')
+register.register_dynamic('LinkToField','linktofield_operation','.convert_linktofield_operation','jiraautomation.operations')
+register.register_dynamic('PlanningReportPerSprint','planning_report_persprint_operation','.planning_report_persprint_operation','jiraautomation.operations')
+register.register_dynamic('PlanningReportPerSprint2','planning_report_persprint_operation2','.planning_report_persprint_operation2','jiraautomation.operations')
+register.register_dynamic('SetDueBySprint','set_due_by_sprint','.set_due_by_sprint','jiraautomation.operations')
+register.register_dynamic('ExportIssuesAsJson','export_issues_as_json','.export_issues_as_json','jiraautomation.operations')
+register.register_dynamic('GenerateWBS','generate_wbs','.generate_wbs','jiraautomation.operations')
+register.register_dynamic('GenerateWBSHTML','generate_wbs_html','.generate_wbs_html','jiraautomation.operations')
+register.register_dynamic('GenerateWBSJson','generate_wbs_json','.generate_wbs_json','jiraautomation.operations')
+register.register_dynamic('GenerateIssuesTree','generate_issues_tree','.generate_issues_tree','jiraautomation.operations')
+register.register_dynamic('GenerateWBSExcel','generate_wbs_excel','.generate_wbs_excel','jiraautomation.operations')
+register.register_dynamic('SharepointFiles','get_files_from_sharepoint','.get_files_from_sharepoint','jiraautomation.operations')

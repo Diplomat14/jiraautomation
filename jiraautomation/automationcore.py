@@ -3,21 +3,26 @@ import jiraorm.BasicConfig as j_cfg
 
 
 class automationcore(object):
-    __logger = None
-
-    __operations = {}
 
     @staticmethod
-    def add_operation(operation):
-        automationcore.__operations[operation.name()] = operation
+    def set_register(register):
+        automationcore.__register = register
 
     @staticmethod
     def get_operation_names():
-        return automationcore.__operations.keys()
+        return automationcore.__register.operation_names
+
+    @staticmethod
+    def get_operation_class(name):
+        return automationcore.__register.get_operation_class(name)
+
+    @staticmethod
+    def is_operation_loaded(name):
+        return automationcore.__register.is_operation_loaded(name)
 
     @staticmethod
     def get_operations():
-        return automationcore.__operations
+        return automationcore.__register.operations
 
 
     

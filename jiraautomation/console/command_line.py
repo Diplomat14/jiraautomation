@@ -14,8 +14,9 @@ def main():
 
     try:
         # Adding operations
-        for op in jiraautomation.operations.register.operations:
-            automationcore.add_operation(op)
+        automationcore.set_register(jiraautomation.operations.register)
+        #for op in jiraautomation.operations.register.operations:
+        #    automationcore.add_operation(op)
 
         # This shall prepare and parse all arguments so that we can easily work with them afterwards
         args = parse_arguments(init_arguments())
@@ -31,11 +32,12 @@ def main():
             output = None
 
             found = False
-            ops = automationcore.get_operations()
-            for op in ops.values():
-                if args.operation == op.name():
+            ops = automationcore.get_operation_names()
+            for op in ops:
+                if args.operation == op:
                     found = True
-                    op_instance = op(l)                    
+                    op_class = automationcore.get_operation_class(op)
+                    op_instance = op_class(l)
                     output = op_instance.execute(container, args)
             if found == False:
                 l.warning("Operation %s not implemented" % str(args.operation))
@@ -60,27 +62,44 @@ def init_arguments():
     # Reusing common arguments (like server, user, log, output, etc.) from orm console
     jiraorm.console.command_line.init_common_arguments(parser)
 
-    operations_group = parser.add_argument_group('Script operations options')
+    requested_operation_name = get_argument_value('o', 'operation')
 
+    operations_group = parser.add_argument_group('Script operations options')
     opnames = automationcore.get_operation_names()
     operations_group.add_argument('-o', '--operation', required=True,
                                   help='Operation that is to be executed', choices=opnames)
     # Reusing common arguments for operation (like query, fields) from orm console
     operations_group = jiraorm.console.command_line.init_common_operations_arguments(operations_group)
 
-    ops = automationcore.get_operations()
-    for op in ops.values():
-        g = parser.add_argument_group('Options of operation ' + op.name())
-        op.init_arguments(g)
+    ops = automationcore.get_operation_names()
+    for op_name in ops:
+        # We do not try to init arguments for all operations if we already know which one exactly we need
+        if requested_operation_name == None or op_name == requested_operation_name:
+            op = automationcore.get_operation_class(op_name)
+            g = parser.add_argument_group('Options of operation ' + op.name())
+            op.init_arguments(g)
 
     return parser
+
+def get_argument_value(name,fullname):
+    parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
+    operations_group = parser.add_argument_group()
+    operations_group.add_argument('-%s' % name, '--%s' % fullname, required=False)
+    args,other = parser.parse_known_args()
+    if hasattr(args,fullname) == True:
+        return getattr(args,fullname)
+    else:
+        return None
 
 def parse_arguments(parser):
     args = parser.parse_args()
 
-    ops = automationcore.get_operations()
-    for op in ops.values():
-        op.parse_arguments(args)
+    ops = automationcore.get_operation_names()
+    for op_name in ops:
+        # We do not want to load operations that were not loaded already during initialization
+        if automationcore.is_operation_loaded(op_name):
+            op = automationcore.get_operation_class(op_name)
+            op.parse_arguments(args)
 
     jiraorm.console.command_line.parse_common_operations_arguments(args)
 

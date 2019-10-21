@@ -16,15 +16,15 @@ class get_files_from_sharepoint(basic_operation):
     def init_arguments(operation_group):
         #   example of url
         # https://aposteragmbh.sharepoint.com/sites/CPMDocumentation/AUDIARCreator/
-        operation_group.add_argument('-spurl', '--sharepointurl', required=True,
+        operation_group.add_argument('-spurl', '--sharepointurl', required=False,
                                      help='Sharepoint Url')
-        operation_group.add_argument('-spun', '--sharepointusername', required=True,
+        operation_group.add_argument('-spun', '--sharepointusername', required=False,
                                      help='Sharepoint UserName')
-        operation_group.add_argument('-sp', '--sharepointpass', required=True,
+        operation_group.add_argument('-sp', '--sharepointpass', required=False,
                                      help='Sharepoint Password')
         # example of file path
         #  /sites/CPMDocumentation/AUDIARCreator/Shared%20Documents/01.%20Project%20Management/02.%20Project%20Plan%20%26%20Status/AUDI%20AR-Creator%20MEB%20Plan.xlsx
-        operation_group.add_argument('-spfpath', '--sharepointfpath', required=True,
+        operation_group.add_argument('-spfpath', '--sharepointfpath', required=False,
                                      help='Sharepoint File Path')
 
     @staticmethod
@@ -44,8 +44,7 @@ class get_files_from_sharepoint(basic_operation):
                 if ctx_auth.acquire_token_for_user(username=args.sharepointusername,
                                                    password=args.sharepointpass):
                     ctx = ClientContext(args.sharepointurl, ctx_auth)
-                    file_name = urllib.parse.unquote(os.path.basename(args.sharepointfpath))
-                    download_data_from_sharepoint(args, file_name, ctx)
+                    download_data_from_sharepoint(args, ctx)
                 else:
                     print(ctx_auth.get_last_error())
 
@@ -56,8 +55,8 @@ class get_files_from_sharepoint(basic_operation):
             l.error("Exception happened during connection establishment " + str(e))
 
 
-def download_data_from_sharepoint(args, filename, context):
-    with open(filename, "wb") as output_file:
+def download_data_from_sharepoint(args, context):
+    with open(args.output, "wb") as output_file:
         response = File.open_binary(context, args.sharepointfpath)
         output_file.write(response.content)
 

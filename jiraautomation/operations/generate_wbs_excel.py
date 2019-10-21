@@ -15,11 +15,13 @@ class generate_wbs_excel(basic_operation):
 
     @staticmethod
     def init_arguments(operation_group):
+        generate_wbs_json.init_arguments(operation_group)
         operation_group.add_argument('-gwbss', '--generatewbs_sprints2fcs', required=False,
                                      help='Path to YAML file containing fcs and its corresponding sprints')
 
     @staticmethod
     def parse_arguments(args):
+        generate_wbs_json.parse_arguments(args)
         pass
 
     def __init__(self, iLogger):

@@ -11,10 +11,12 @@ class generate_wbs_json(basic_operation):
 
     @staticmethod
     def init_arguments(operation_group):
+        generate_wbs.init_arguments(operation_group)
         pass
 
     @staticmethod
     def parse_arguments(args):
+        generate_wbs.parse_arguments(args)
         pass
 
     def __init__(self, iLogger):

@@ -57,8 +57,9 @@ class basic_operation(object):
         return "Basic"
 
     @staticmethod
-    def init_arguments(self,operation_group):
-        # operations_group = parser.add_argument_group
+    def init_arguments(operation_group):
+        # Add linkage to any used command which requires parameters
+        #used_operation.init_arguments(operation_group
 
         # Add your argparse parameters here
         # operations_group.add_argument('-param1', '--parameter1', required=True,
@@ -66,7 +67,10 @@ class basic_operation(object):
         pass
 
     @staticmethod
-    def parse_arguments(self,args):
+    def parse_arguments(args):
+        # Add linkage to any used command which requires parameters
+        # used_operation.parse_arguments(args)
+
         # You might want to prepare arguments somehow like:
         # args.operation = CoreOperation[args.operation]
         # TODO: Do i need to return? it is by reference actually

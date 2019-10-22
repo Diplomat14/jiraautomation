@@ -263,6 +263,10 @@ class WBS_Entry(object):
         return self.__tree_node.data.getFieldAsString('key')
 
     @property
+    def lastsprint(self):
+        return self.__tree_node.data.getFieldAsString('lastsprint')
+
+    @property
     def firstsprint(self):
         return self.__tree_node.data.getFieldAsString('firstsprint')
 

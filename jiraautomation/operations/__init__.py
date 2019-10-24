@@ -13,5 +13,4 @@ register.register_dynamic('GenerateWBS','generate_wbs','.generate_wbs','jiraauto
 register.register_dynamic('GenerateWBSHTML','generate_wbs_html','.generate_wbs_html','jiraautomation.operations')
 register.register_dynamic('GenerateWBSJson','generate_wbs_json','.generate_wbs_json','jiraautomation.operations')
 register.register_dynamic('GenerateIssuesTree','generate_issues_tree','.generate_issues_tree','jiraautomation.operations')
-register.register_dynamic('GenerateWBSExcel','generate_wbs_excel','.generate_wbs_excel','jiraautomation.operations')
 register.register_dynamic('SharepointFiles','get_files_from_sharepoint','.get_files_from_sharepoint','jiraautomation.operations')

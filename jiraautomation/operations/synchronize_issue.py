@@ -1,5 +1,5 @@
 from jiraautomation.operations.operation import  basic_operation
-from xdev.types.algorithms.merge import merger, merge_object
+from xdev.types.algorithms.merge import merger, merge_object, merge_rules, resolve_conflict_t
 
 class synchronize_issue(basic_operation):
 
@@ -63,10 +63,12 @@ class synchronize_issue(basic_operation):
         elif trg_obj_source_key[-len(src_obj_key):] != src_obj_key:
             self.logger.warning('Existing source reference of issue %s (source set to %s) differs from proposal to merge with %s' % (trg_obj_key, trg_obj_source_key, src_obj_key) )
         else:
+            rules = merge_rules(resolve_conflict_t.LEFT)
+
             merge_result = merger.merge_objects(
                 merge_object(src_obj,src_obj_updates),
                 merge_object(trg_obj,trg_obj_updates),
-                True,[],None,False, True)
+                rules)
 
             for f in merge_result.left_changed_fields:
                 newv = merge_result.merged_object.data_map[f]
@@ -74,7 +76,7 @@ class synchronize_issue(basic_operation):
                 src.setField(f, newv)
             for f in merge_result.right_changed_fields:
                 newv = merge_result.merged_object.data_map[f]
-                self.logger.msg('Updating issue %s, field %s to new value %s' % (src_obj_key, f, str(newv)))
+                self.logger.msg('Updating issue %s, field %s to new value %s' % (trg_obj_key, f, str(newv)))
                 trg.setField(f, newv)
 
     def obj_from_issue(self,issue, fields):

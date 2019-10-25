@@ -14,3 +14,4 @@ register.register_dynamic('GenerateWBSHTML','generate_wbs_html','.generate_wbs_h
 register.register_dynamic('GenerateWBSJson','generate_wbs_json','.generate_wbs_json','jiraautomation.operations')
 register.register_dynamic('GenerateIssuesTree','generate_issues_tree','.generate_issues_tree','jiraautomation.operations')
 register.register_dynamic('SharepointFiles','get_files_from_sharepoint','.get_files_from_sharepoint','jiraautomation.operations')
+register.register_dynamic('SynchronizeIssue','synchronize_issue','.synchronize_issue','jiraautomation.operations')

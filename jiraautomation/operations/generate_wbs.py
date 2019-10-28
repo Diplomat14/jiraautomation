@@ -67,10 +67,10 @@ class generate_wbs(basic_operation):
             try:
                 # Reading and preparing data from command line parameters
                 nonwbstypesmapping = args.generatewbs_NonWBSTypesMapping
-                epiccategoryfield = container.getJIRA().getFieldIDString(args.generatewbs_EpicCategory) if not Exception else ''
-                perto_fieldid = container.getJIRA().getFieldIDString(args.generatewbs_PERTO) if not Exception else ''
-                pertp_fieldid = container.getJIRA().getFieldIDString(args.generatewbs_PERTP) if not Exception else ''
-                pertrm_fieldid = container.getJIRA().getFieldIDString(args.generatewbs_PERTR) if not Exception else ''
+                epiccategoryfield = args.generatewbs_EpicCategory if hasattr(args, 'generatewbs_EpicCategory') else None
+                perto_field_name = args.generatewbs_PERTO if hasattr(args, 'generatewbs_PERTO') else None
+                pertp_field_name = args.generatewbs_PERTP if hasattr(args, 'generatewbs_PERTO') else None
+                pertrm_field_name = args.generatewbs_PERTR if hasattr(args, 'generatewbs_PERTO') else None
 
                 with open(args.generatewbs_Component2Teams) as f:
                     c2tmap = yaml.load(f, Loader=yaml.Loader)
@@ -93,7 +93,7 @@ class generate_wbs(basic_operation):
                 c2tconverter = ComponentToDomainConverter(c2tmap)
                 for issue in issues_list:
                     entry_list.append(
-                        WBS_Entry(issue, perto_fieldid, pertrm_fieldid, pertp_fieldid, epiccategoryfield, c2tconverter,
+                        WBS_Entry(issue, perto_field_name, pertrm_field_name, pertp_field_name, epiccategoryfield, c2tconverter,
                                   nonwbstypesmapping,fbspathbuilder))
                 return entry_list
 

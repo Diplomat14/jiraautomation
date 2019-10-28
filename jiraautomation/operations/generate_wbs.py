@@ -54,8 +54,9 @@ class generate_wbs(basic_operation):
 
         pass
 
-    def __init__(self, iLogger):
+    def __init__(self, iLogger, tree=None):
         super(generate_wbs, self).__init__(iLogger)
+        self.tree=tree
 
     def execute(self, container, args):
         l = self.logger
@@ -66,23 +67,26 @@ class generate_wbs(basic_operation):
             try:
                 # Reading and preparing data from command line parameters
                 nonwbstypesmapping = args.generatewbs_NonWBSTypesMapping
-                epiccategoryfield = container.getJIRA().getFieldIDString(args.generatewbs_EpicCategory)
-                perto_fieldid = container.getJIRA().getFieldIDString(args.generatewbs_PERTO)
-                pertp_fieldid = container.getJIRA().getFieldIDString(args.generatewbs_PERTP)
-                pertrm_fieldid = container.getJIRA().getFieldIDString(args.generatewbs_PERTR)
+                epiccategoryfield = container.getJIRA().getFieldIDString(args.generatewbs_EpicCategory) if not Exception else ''
+                perto_fieldid = container.getJIRA().getFieldIDString(args.generatewbs_PERTO) if not Exception else ''
+                pertp_fieldid = container.getJIRA().getFieldIDString(args.generatewbs_PERTP) if not Exception else ''
+                pertrm_fieldid = container.getJIRA().getFieldIDString(args.generatewbs_PERTR) if not Exception else ''
 
                 with open(args.generatewbs_Component2Teams) as f:
                     c2tmap = yaml.load(f, Loader=yaml.Loader)
 
                 # Generating hierarchy tree
-                op = generate_issues_tree(l)
-                resulting_tree = op.execute(container, args)
+                if self.tree is None:
+                    op = generate_issues_tree(l)
+                    resulting_tree = op.execute(container, args)
 
-                # Collapsing hierarchy tree to a list
-                expandIssues = False
-                if args.generatewbs_ExpandIssues is not None:
-                    expandIssues = True
-                issues_list = self.issuesToTree(resulting_tree, expandIssues)
+                    # Collapsing hierarchy tree to a list
+                    expandIssues = False
+                    if args.generatewbs_ExpandIssues is not None:
+                        expandIssues = True
+                    issues_list = self.issuesToTree(resulting_tree, expandIssues)
+                else:
+                    issues_list = self.tree
 
                 entry_list = list()
                 fbspathbuilder = FBSPathBuilder(args.generatewbs_WBSTypes)
@@ -91,7 +95,6 @@ class generate_wbs(basic_operation):
                     entry_list.append(
                         WBS_Entry(issue, perto_fieldid, pertrm_fieldid, pertp_fieldid, epiccategoryfield, c2tconverter,
                                   nonwbstypesmapping,fbspathbuilder))
-
                 return entry_list
 
             except Exception as e:
@@ -216,6 +219,9 @@ class WBS_Entry(object):
         self.__nonwbstypesmapping = nonwbstypesmapping
         self.__fbspathbuilder = fbspathbuilder
         self.__c2dconverter = c2dconverter
+
+    def __eq__(self, other):
+        return self.summary == other.summary
 
     @property
     def perto(self):

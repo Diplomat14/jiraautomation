@@ -78,6 +78,7 @@ def init_arguments():
             op = automationcore.get_operation_class(op_name)
             g = parser.add_argument_group('Options of operation ' + op.name())
             op.init_arguments(g)
+            break
 
     return parser
 
@@ -93,13 +94,15 @@ def get_argument_value(name,fullname):
 
 def parse_arguments(parser):
     args = parser.parse_args()
+    requested_operation_name = args.operation
 
     ops = automationcore.get_operation_names()
     for op_name in ops:
-        # We do not want to load operations that were not loaded already during initialization
-        if automationcore.is_operation_loaded(op_name):
+        # parsing only for requested operation
+        if op_name == requested_operation_name:
             op = automationcore.get_operation_class(op_name)
             op.parse_arguments(args)
+            break
 
     jiraorm.console.command_line.parse_common_operations_arguments(args)
 

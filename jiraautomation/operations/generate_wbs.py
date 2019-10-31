@@ -180,6 +180,10 @@ class FBSPathBuilder(object):
         return parent.data.getFieldAsString(self.__field) if parent.data.getFieldAsString(
             'issuetype') in self.__wbs_types.split(',') else ""
 
+    def __parentNode(self, parent):
+        return parent.data if parent.data.getFieldAsString(
+            'issuetype') in self.__wbs_types.split(',') else ""
+
     def level(self, node_tree):
         if node_tree not in self.__cache:
             self.build(node_tree)
@@ -190,7 +194,7 @@ class FBSPathBuilder(object):
         else:
             return path.count(self.__separator) + 2
 
-    def parentAsString(self, node_tree, level, all_remaining):
+    def parentAsString(self, node_tree, level, all_remaining, custom_field=False):
         if node_tree not in self.__cache:
             self.build(node_tree)
 
@@ -202,7 +206,10 @@ class FBSPathBuilder(object):
             return ""
         else:
             if all_remaining == False:
-                return self.__parentToString(parents[level - 1])
+                if custom_field:
+                    return self.__parentNode(parents[level - 1])
+                else:
+                    return self.__parentToString(parents[level - 1])
             else:
 
                 return self.__parentsToString(parents[level - 1:])
@@ -330,6 +337,18 @@ class WBS_Entry(object):
     @property
     def path_builder_fourth(self, includeNextLevels = True ):
         return self.__fbspathbuilder.parentAsString(self.__tree_node, 4, includeNextLevels)
+
+    @property
+    def path_builder_id_first(self):
+        return self.__fbspathbuilder.parentAsString(self.__tree_node, 1, False, True).getFieldAsString('key')
+
+    @property
+    def path_builder_id_second(self):
+        return self.__fbspathbuilder.parentAsString(self.__tree_node, 2, False, True).getFieldAsString('key')
+
+    @property
+    def path_builder_id_third(self):
+        return self.__fbspathbuilder.parentAsString(self.__tree_node, 3, False, True).getFieldAsString('key')
 
     @property
     def non_wbstypes_mapping(self):

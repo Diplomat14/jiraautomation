@@ -35,6 +35,8 @@ class generate_wbs(basic_operation):
                                      help='Specify if epics issues shall be expanded to issues')
         operation_group.add_argument('-gwbswt', '--generatewbs_WBSTypes', required=False,
                                      help='Types that could possibly be shown in FBS Level 4+')
+        operation_group.add_argument('-gwbsCUSTLINK', '--generatewbs_CustJiraLink', required=False,
+                                     help='Name of the Customer Link Field ')
         pass
 
     @staticmethod
@@ -71,6 +73,7 @@ class generate_wbs(basic_operation):
                 perto_field_name = args.generatewbs_PERTO if hasattr(args, 'generatewbs_PERTO') else None
                 pertp_field_name = args.generatewbs_PERTP if hasattr(args, 'generatewbs_PERTO') else None
                 pertrm_field_name = args.generatewbs_PERTR if hasattr(args, 'generatewbs_PERTO') else None
+                custjiralink_field_name = args.generatewbs_CustJiraLink if hasattr(args, 'generatewbs_CustJiraLink') else None
 
                 with open(args.generatewbs_Component2Teams) as f:
                     c2tmap = yaml.load(f, Loader=yaml.Loader)
@@ -94,7 +97,7 @@ class generate_wbs(basic_operation):
                 for issue in issues_list:
                     entry_list.append(
                         WBS_Entry(issue, perto_field_name, pertrm_field_name, pertp_field_name, epiccategoryfield, c2tconverter,
-                                  nonwbstypesmapping,fbspathbuilder))
+                                  nonwbstypesmapping,fbspathbuilder,custjiralink_field_name))
                 return entry_list
 
             except Exception as e:
@@ -147,7 +150,7 @@ class FBSPathBuilder(object):
         self.__field = field
         self.__cache = {}
 
-    def build(self, node_tree):
+    def build(self, node_tree, cust_field):
         assert isinstance(node_tree, tree_node_type)
         assert isinstance(node_tree.data, IssueExt)
 
@@ -155,16 +158,22 @@ class FBSPathBuilder(object):
             parents = []
 
             currentparent = node_tree.parent
+
             while currentparent != None:
                 assert isinstance(currentparent, tree_node_type)
                 assert isinstance(currentparent.data, IssueExt)
                 parents.insert(0, currentparent)
                 currentparent = currentparent.parent
+            else:
+                if cust_field:
+                    parents.append(node_tree)
+
 
             path = self.__parentsToString(parents)
             self.__cache[node_tree] = (parents, path)
 
         return self.__cache[node_tree][1]
+
 
     def __parentsToString(self, parents):
         path = ""
@@ -184,9 +193,9 @@ class FBSPathBuilder(object):
         return parent.data if parent.data.getFieldAsString(
             'issuetype') in self.__wbs_types.split(',') else ""
 
-    def level(self, node_tree):
+    def level(self, node_tree, custom_field):
         if node_tree not in self.__cache:
-            self.build(node_tree)
+            self.build(node_tree, custom_field)
 
         (parents, path) = self.__cache[node_tree]
         if path == "":
@@ -196,7 +205,7 @@ class FBSPathBuilder(object):
 
     def parentAsString(self, node_tree, level, all_remaining, custom_field=False):
         if node_tree not in self.__cache:
-            self.build(node_tree)
+            self.build(node_tree, custom_field)
 
         (parents, path) = self.__cache[node_tree]
 
@@ -217,7 +226,7 @@ class FBSPathBuilder(object):
 
 class WBS_Entry(object):
     def __init__(self, tree_node, perto_fieldid, pertrm_fieldid, pertp_fieldid, epiccategoryfield, c2dconverter,
-                 nonwbstypesmapping, fbspathbuilder):
+                 nonwbstypesmapping, fbspathbuilder, custjiralink_field_name):
         self.__tree_node = tree_node
         self.__perto_fieldid = perto_fieldid
         self.__pertrm_fieldid = pertrm_fieldid
@@ -226,6 +235,7 @@ class WBS_Entry(object):
         self.__nonwbstypesmapping = nonwbstypesmapping
         self.__fbspathbuilder = fbspathbuilder
         self.__c2dconverter = c2dconverter
+        self.__custjiralink_field = custjiralink_field_name
 
     def __eq__(self, other):
         return self.summary == other.summary
@@ -316,11 +326,11 @@ class WBS_Entry(object):
 
     @property
     def path_builder_level(self):
-        return self.__fbspathbuilder.level(self.__tree_node)
+        return self.__fbspathbuilder.level(self.__tree_node, False)
 
     @property
     def path_builder_build(self):
-        return self.__fbspathbuilder.build(self.__tree_node)
+        return self.__fbspathbuilder.build(self.__tree_node, False)
 
     @property
     def path_builder_first(self):
@@ -357,6 +367,10 @@ class WBS_Entry(object):
     @property
     def parent_id(self):
         return self.__tree_node.parent.data.getFieldAsString('key')
+
+    @property
+    def custjiralink_field(self):
+        return self.__tree_node.data.getField(self.__custjiralink_field)
 
 
 class ComponentToDomainConverter(object):

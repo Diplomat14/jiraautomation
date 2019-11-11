@@ -1,0 +1,64 @@
+
+
+
+table {
+   border: 2px solid black;
+   border-spacing: 0px 0px;
+   font-size: 12px;
+   float: left;
+}
+
+
+th, td {
+   padding: 5px;
+   white-space:nowrap;
+   border-right: 1px dotted #AAAAAA;
+}
+
+th {
+   border-bottom: 1px dotted black;
+   background-color: #d8e4bc;
+}
+
+th.narrow, td.narrow {
+   max-width: 100px;
+   overflow: hidden;
+   white-space: nowrap;
+}
+
+td.exist {
+   background-color: #8cd9b3;
+}
+
+td.notexist {
+   background-color: #e6606e;
+}
+
+.key {
+   font-weight: bold;
+}
+
+
+.newsectionnext {
+   border-right: 1px solid #777777;
+}
+
+td .icon {
+   height: 12px;
+}
+
+.rowFMG {
+   background-color: #BFBFBF;
+}
+
+.rowFG {
+   background-color: #CFCFCF;
+}
+
+.rowFHLF {
+   background-color: #D9D9D9;
+}
+
+.rowFBS {
+  background-color: #EEE;
+}

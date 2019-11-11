@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>JiraComparator</title>
+    <link rel="stylesheet" type="text/css" href="jira_comparator.css">
+</head>
+<body>
+
+<div class="container-table100">
+    <div class="table100">
+        <table style="float: left">
+            <thead>
+            <tr>
+                <!-- Jira Types -->
+                <th class="newsectionnext " colspan="4">Jira</th>
+            </tr>
+            </thead>
+            <thead>
+            <tr class="rowWBS head">
+                <!-- Jira Types -->
+                <th class="narrow">High-Level Feature</th>
+                <th class="narrow">Feature_1lvl</th>
+                <th class="narrow">Feature_2lvl</th>
+                <th class="narrow">Epic</th>
+
+            </tr>
+            </thead>
+            <tbody>
+
+            <tr>
+            {% for issue in result %}
+                {% if value is iterable %}
+                    {% for i in issue %}
+                        {% if i is not string %}
+                            {% if not i.exist %}
+                                <td class="notexist"><div style="width:250px"><a href="{{ param_serverbase }}/browse/{{ i.original.key  }}">{{ i.original.fields.summary }}</a></div></td>
+                            {% else %}
+                                <td class="exist"><div style="width:250px"><a href="{{ param_serverbase }}/browse/{{ i.original.key  }}">{{ i.original.fields.summary }}</a></div></td>
+                            {% endif %}
+                         {% endif %}
+                    {% endfor %}
+                    {% endif %}
+            </tr>
+            {% endfor %}
+
+            </tbody>
+        </table>
+        <table style="float: right">
+            <thead>
+            <tr>
+                <!-- Jira Types -->
+                <th class="newsectionnext " colspan="4">Custom Jira</th>
+            </tr>
+            </thead>
+            <thead>
+            <tr class="rowWBS head">
+                <!-- Custom Jira Types -->
+                <th class="narrow">Epic</th>
+                <th class="narrow">Capability</th>
+                <th class="narrow">Feature</th>
+                <th class="narrow">Story</th>
+
+            </tr>
+            </thead>
+            <tbody>
+
+            <tr>
+            {% for issue in cust_result %}
+                {% if value is iterable %}
+                    {% for i in issue %}
+                        {% if i is not string %}
+                            {% if not i.exist %}
+                                <td class="notexist"><div style="width:180px"><a href="https://group-cip.audi.de/jira/browse/{{ i.original.key  }}">{{ i.original.fields.summary }}</a></div></td>
+                            {% else %}
+                                <td class="exist"><div style="width:180px"><a href="https://group-cip.audi.de/jira/browse/{{ i.original.key  }}">{{ i.original.fields.summary }}</a></div></td>
+                            {% endif %}
+                         {% endif %}
+                    {% endfor %}
+                    {% endif %}
+            </tr>
+            {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
+

@@ -34,6 +34,10 @@ td.notexist {
    background-color: #e6606e;
 }
 
+td.partlyexist {
+   background-color: #ffff99;
+}
+
 .key {
    font-weight: bold;
 }

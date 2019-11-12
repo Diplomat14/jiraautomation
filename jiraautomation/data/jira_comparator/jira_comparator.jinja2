@@ -34,6 +34,8 @@
                         {% if i is not string %}
                             {% if not i.exist %}
                                 <td class="notexist"><div style="width:250px"><a href="{{ param_serverbase }}/browse/{{ i.original.key  }}">{{ i.original.fields.summary }}</a></div></td>
+                            {% elif i.exist == 'partly' %}
+                                <td class="partlyexist"><div style="width:250px"><a href="{{ param_serverbase }}/browse/{{ i.original.key  }}">{{ i.original.fields.summary }}</a></div></td>
                             {% else %}
                                 <td class="exist"><div style="width:250px"><a href="{{ param_serverbase }}/browse/{{ i.original.key  }}">{{ i.original.fields.summary }}</a></div></td>
                             {% endif %}
@@ -70,9 +72,11 @@
                     {% for i in issue %}
                         {% if i is not string %}
                             {% if not i.exist %}
-                                <td class="notexist"><div style="width:180px"><a href="https://group-cip.audi.de/jira/browse/{{ i.original.key  }}">{{ i.original.fields.summary }}</a></div></td>
+                                <td class="notexist"><div style="width:200px"><a href="https://group-cip.audi.de/jira/browse/{{ i.original.key  }}">{{ i.original.fields.summary }}</a></div></td>
+                            {% elif i.exist == 'partly' %}
+                                <td class="partlyexist"><div style="width:200px"><a href="https://group-cip.audi.de/jira/browse/{{ i.original.key  }}">{{ i.original.fields.summary }}</a></div></td>
                             {% else %}
-                                <td class="exist"><div style="width:180px"><a href="https://group-cip.audi.de/jira/browse/{{ i.original.key  }}">{{ i.original.fields.summary }}</a></div></td>
+                                <td class="exist"><div style="width:200px"><a href="https://group-cip.audi.de/jira/browse/{{ i.original.key  }}">{{ i.original.fields.summary }}</a></div></td>
                             {% endif %}
                          {% endif %}
                     {% endfor %}

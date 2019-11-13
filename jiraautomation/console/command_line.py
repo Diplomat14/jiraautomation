@@ -13,10 +13,12 @@ def main():
     l.msg("JIRA Automation Command Line tool started")
 
     try:
-        if get_argument_value('log', 'logoutput') != None:
-            l.set_path(args.logoutput)
-        if get_argument_value('dbg', 'debug') != None:
-            l.set_debug(args.debug)
+        logoutput =get_argument_value('log', 'logoutput')
+        if logoutput != None:
+            l.set_path(logoutput)
+        debug = get_argument_value('dbg', 'debug')
+        if debug != None:
+            l.set_debug(True)
 
         # Adding operations
         automationcore.set_register(jiraautomation.operations.register)

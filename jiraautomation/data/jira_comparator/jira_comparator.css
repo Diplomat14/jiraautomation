@@ -12,18 +12,14 @@ table {
 th, td {
    padding: 5px;
    white-space:nowrap;
+   max-width: 150px;
+   overflow: hidden;
    border-right: 1px dotted #AAAAAA;
 }
 
 th {
    border-bottom: 1px dotted black;
    background-color: #d8e4bc;
-}
-
-th.narrow, td.narrow {
-   max-width: 100px;
-   overflow: hidden;
-   white-space: nowrap;
 }
 
 td.exist {

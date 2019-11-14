@@ -8,24 +8,31 @@
 
 <div class="container-table100">
     <div class="table100">
-        <table style="float: left">
+        <table style="float: center">
             <thead>
             <tr>
                 <!-- Jira Types -->
-                <th class="newsectionnext " colspan="4">Jira</th>
+                <th class="newsectionnext " colspan="12">Jira</th>
             </tr>
             </thead>
             <thead>
             <tr class="rowWBS head">
                 <!-- Jira Types -->
                 <th class="narrow">High-Level Feature</th>
+                <th class="narrow">High-Level Feature Info</th>
+                <th class="narrow">Cust Jira Epic</th>
                 <th class="narrow">Feature_1lvl</th>
+                <th class="narrow">Feature_1lvl Info</th>
+                <th class="narrow">Cust Jira Capability</th>
                 <th class="narrow">Feature_2lvl</th>
+                <th class="narrow">Feature_2lvl Info</th>
+                <th class="narrow">Cust Jira Feature</th>
                 <th class="narrow">Epic</th>
-
+                <th class="narrow">Epic Info</th>
+                <th class="narrow">Cust Jira Story</th>
             </tr>
             </thead>
-            <tbody>
+        <tbody>
 
             <tr>
             {% for issue in result %}
@@ -33,35 +40,52 @@
                     {% for i in issue %}
                         {% if i is not string %}
                             {% if not i.exist %}
-                                <td class="notexist"><div style="width:250px"><a href="{{ param_serverbase }}/browse/{{ i.original.key  }}">{{ i.original.fields.summary }}</a></div></td>
+                                <td class="notexist"><a href="{{ param_serverbase }}/browse/{{ i.original.key  }}">{{ i.getField('summary')}}  </a></td>
+                                <td class="notexist">{{ i.getFieldAsString('sprint') }}</div></td>
+                                <td class="notexist"></td>
                             {% elif i.exist == 'partly' %}
-                                <td class="partlyexist"><div style="width:250px"><a href="{{ param_serverbase }}/browse/{{ i.original.key  }}">{{ i.original.fields.summary }}</a></div></td>
+                                <td class="partlyexist"><a href="{{ param_serverbase }}/browse/{{ i.original.key  }}">{{ i.getField('summary')}}</a></td>
+                                <td class="partlyexist">{{ i.getFieldAsString('sprint')}} | {{ i.compare_jira.data.getFieldAsString('sprint') }}</div></td>
+                                {% if i.compare_jira %}
+                                <td class="partlyexist"><a href=" {{ i.getField('customfield_10747') }}">{{ i.compare_jira.data.original.fields.summary }} </a></td>
+                                {% else %}
+                                <td class="partlyexist">{{ i.getField('summary') }}</td>
+                                {% endif %}
                             {% else %}
-                                <td class="exist"><div style="width:250px"><a href="{{ param_serverbase }}/browse/{{ i.original.key  }}">{{ i.original.fields.summary }}</a></div></td>
+                                <td class="exist"><a href="{{ param_serverbase }}/browse/{{ i.original.key  }}">{{ i.getField('summary')}}</a></td>
+                                <td class="exist">{{ i.getFieldAsString('sprint') }} | {{ i.compare_jira.data.getFieldAsString('sprint') }}</div></td>
+                                <td class="exist"><a href=" {{ i.getField('customfield_10747') }}">{{ i.compare_jira.data.original.fields.summary }} </a></td>
                             {% endif %}
                          {% endif %}
                     {% endfor %}
                     {% endif %}
             </tr>
-            {% endfor %}
+        {% endfor %}
 
-            </tbody>
+        </tbody>
         </table>
-        <table style="float: right">
+        <table style="float: center">
             <thead>
             <tr>
                 <!-- Jira Types -->
-                <th class="newsectionnext " colspan="4">Custom Jira</th>
+                <th class="newsectionnext " colspan="12">Custom Jira</th>
             </tr>
             </thead>
             <thead>
             <tr class="rowWBS head">
                 <!-- Custom Jira Types -->
                 <th class="narrow">Epic</th>
+                <th class="narrow">Epic Info</th>
+                <th class="narrow">Jira High-Level Feature</th>
                 <th class="narrow">Capability</th>
+                <th class="narrow">Capability Info</th>
+                <th class="narrow">Jira Feature_1lvl</th>
                 <th class="narrow">Feature</th>
+                <th class="narrow">Feature Info</th>
+                <th class="narrow">Jira Feature_2lvl</th>
                 <th class="narrow">Story</th>
-
+                <th class="narrow">Story Info</th>
+                <th class="narrow">Jira Epic</th>
             </tr>
             </thead>
             <tbody>
@@ -72,15 +96,26 @@
                     {% for i in issue %}
                         {% if i is not string %}
                             {% if not i.exist %}
-                                <td class="notexist"><div style="width:200px"><a href="https://group-cip.audi.de/jira/browse/{{ i.original.key  }}">{{ i.original.fields.summary }}</a></div></td>
-                            {% elif i.exist == 'partly' %}
-                                <td class="partlyexist"><div style="width:200px"><a href="https://group-cip.audi.de/jira/browse/{{ i.original.key  }}">{{ i.original.fields.summary }}</a></div></td>
+                            <td class="notexist"><a href="https://group-cip.audi.de/jira/browse/{{ i.original.key  }}">{{ i.getField('summary') }}</a></td>
+                            <td class="notexist">{{ i.getFieldAsString('sprint') }}</td>
+                            <td class="notexist"></td>
+                        {% elif i.exist == 'partly' %}
+                            <td clasqs="partlyexist"><a href="https://group-cip.audi.de/jira/browse/{{ i.original.key  }}">{{ i.getField('summary') }}</a></td>
+                            <td class="partlyexist">{{ i.getFieldAsString('sprint') }}</td>
+                            {% if i.compare_jira %}
+                            <td class="partlyexist"><a href="{{ param_serverbase }}/browse/{{ i.compare_jira.data.getField('key') }}">{{ i.compare_jira.data.original.fields.summary }} </a></td>
                             {% else %}
-                                <td class="exist"><div style="width:200px"><a href="https://group-cip.audi.de/jira/browse/{{ i.original.key  }}">{{ i.original.fields.summary }}</a></div></td>
+                            <td class="partlyexist">{{ i.getField('summary') }}</td>
                             {% endif %}
-                         {% endif %}
-                    {% endfor %}
+                        {% else %}
+                            <td class="exist"><a href="https://group-cip.audi.de/jira/browse/{{ i.original.key  }}">{{ i.getField('summary') }}</a></td>
+                            <td class="exist">{{ i.getFieldAsString('sprint') }}</td>
+                            <td class="exist"><a href="{{ param_serverbase }}/browse/{{i.compare_jira.data.getField('key') }}">{{ i.compare_jira.data.original.fields.summary}} </a></td>
+                        {% endif %}
                     {% endif %}
+                {% endfor %}
+                {% endif %}
+
             </tr>
             {% endfor %}
 
@@ -90,4 +125,3 @@
 </div>
 </body>
 </html>
-

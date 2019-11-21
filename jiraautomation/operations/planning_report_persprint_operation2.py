@@ -157,9 +157,10 @@ def get_epic_issues_by_sprint(epic,logger):
 
 def escape_string(raw):
     s = str(raw)
-    return s.translate(s.maketrans({'"':  r'\"'}))
+    return s.translate(s.maketrans({'"':  r'\"',"\n":None,"\r":None}))
 
 def print_issue_as_javascript_data(issue,fields, extraFields, arrayName:str):
+    # TODO: Replace with json.dump
     jsString = ""
 
     jsString += '%s.push({' % arrayName

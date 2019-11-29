@@ -77,7 +77,8 @@ class generate_custom_jira_structure(basic_operation):
 def get_all_arhud_epics(issues, args):
     for issue in issues:
         if re.search(args.generatestruct_SummaryFilter.split(' ')[0], issue.data.original.fields.summary):
-            yield modified_issues_summary(issue)
+            # yield modified_issues_summary(issue)
+            yield issue
 
 
 def get_all_assignee_by_filter(jira, project_key, username, start=0, limit=50):
@@ -101,7 +102,8 @@ def modified_issues_summary(issue):
 
 def get_audi_child_capabilities(child, l, args):
     if re.search(args.generatestruct_SummaryFilter, child.data.original.fields.summary):
-        return modified_issues_summary(child)
+        # return modified_issues_summary(child)
+        return child
     elif re.search(' '.join(args.generatestruct_SummaryFilter.split(' ', 2)[:2]), child.data.original.fields.summary):
         l.error("{} task is not impl type".format(child.data.original.key))
 

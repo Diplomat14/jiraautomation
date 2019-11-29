@@ -24,6 +24,8 @@ class generate_issues_tree(basic_operation):
                                      help='Type of starting node')
         operation_group.add_argument('-lkrule', '--genisstree_LinkRule', required=False,
                                      help='Link of rule')
+        operation_group.add_argument('-dtoget', '--genisstree_IssueDateToGet', required=False,
+                                     help='Desired date to get issue data for')
         pass
 
     @staticmethod
@@ -47,7 +49,10 @@ class generate_issues_tree(basic_operation):
                 linkrule = args.genisstree_LinkRule
                 top_request_query = args.query
                 l.msg("Requesting issues by query: %s" % top_request_query)
-                issues = jira.search_issues_nolim(top_request_query,maxResults=None)
+                if args.genisstree_IssueDateToGet:
+                    issues = jira.search_issues_nolim(top_request_query,maxResults=None,expand='changelog,editmeta',date=args.genisstree_IssueDateToGet)
+                else:
+                    issues = jira.search_issues_nolim(top_request_query,maxResults=None)
                 l.msg(str(len(issues)) + " issues found")
 
                 graph = convertissues_to_graph(issues,l,container,root_for_not_processed_key, startingnodestype)

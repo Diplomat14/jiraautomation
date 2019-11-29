@@ -9,24 +9,30 @@
 <table>
     <thead>
     <tr>
+        <!-- Info -->
+        <th class="newsectionnext" colspan="6">Details</th>
         <!-- Jira Types -->
-        <th class="newsectionnext " colspan="12">Jira</th>
+        <th class="newsectionnext " colspan="8">Jira tree</th>
+
     </tr>
     </thead>
     <thead>
     <tr class="rowWBS head">
+        <!-- Info -->
+        <th class="narrow">Status</th>
+        <th class="narrow">Cust Status</th>
+        <th class="narrow">Sprint</th>
+        <th class="narrow">Cust Sprint</th>
+        <th class="narrow">Assignee</th>
+        <th class="narrow">Cust Assignee</th>
         <!-- Jira Types -->
         <th class="narrow">High-Level Feature</th>
-        <th class="narrow">High-Level Feature Info</th>
         <th class="narrow">Cust Jira Epic</th>
         <th class="narrow">Feature_1lvl</th>
-        <th class="narrow">Feature_1lvl Info</th>
         <th class="narrow">Cust Jira Capability</th>
         <th class="narrow">Feature_2lvl</th>
-        <th class="narrow">Feature_2lvl Info</th>
         <th class="narrow">Cust Jira Feature</th>
         <th class="narrow">Epic</th>
-        <th class="narrow">Epic Info</th>
         <th class="narrow">Cust Jira Story</th>
     </tr>
     </thead>
@@ -34,16 +40,34 @@
 
     <tr>
     {% for issue in result %}
-        {% if value is iterable %}
+        {% if issue|length >0 %}
+            <!-- Info -->
+            <td>{{ issue[-1].getFieldAsString('status') }}</td>
+            {% if issue[-1].compare_jira %}
+                <td>{{ issue[-1].compare_jira.data.getFieldAsString('status') }}</td>
+            {% else %}
+                <td></td>
+            {% endif %}
+            <td>{{ issue[-1].getFieldAsString('sprint') }}</td>
+            {% if issue[-1].compare_jira %}
+                <td>{{ issue[-1].compare_jira.data.getFieldAsString('sprint') }}</td>
+            {% else %}
+                <td></td>
+            {% endif %}
+            <td>{{ issue[-1].getField('assignee').displayName }}</td>
+            {% if issue[-1].compare_jira %}
+                <td>{{ issue[-1].compare_jira.data.getField('assignee').displayName }}</td>
+            {% else %}
+                <td></td>
+            {% endif %}
+            <!-- Jira Types -->
             {% for i in issue %}
                 {% if i is not string %}
                     {% if not i.exist %}
                         <td class="notexist"><a href="{{ param_serverbase }}/browse/{{ i.original.key  }}">{{ i.getField('summary')}}  </a></td>
-                        <td class="notexist">{{ i.getFieldAsString('sprint') }}</div></td>
                         <td class="notexist"></td>
                     {% elif i.exist == 'partly' %}
                         <td class="partlyexist"><a href="{{ param_serverbase }}/browse/{{ i.original.key  }}">{{ i.getField('summary')}}</a></td>
-                        <td class="partlyexist">{{ i.getFieldAsString('sprint')}}</div></td>
                         {% if i.compare_jira %}
                         <td class="partlyexist"><a href=" {{ i.getField('customfield_10747') }}">{{ i.compare_jira.data.original.fields.summary }} </a></td>
                         {% else %}
@@ -51,12 +75,11 @@
                         {% endif %}
                     {% else %}
                         <td class="exist"><a href="{{ param_serverbase }}/browse/{{ i.original.key  }}">{{ i.getField('summary')}}</a></td>
-                        <td class="exist">{{ i.getFieldAsString('sprint') }} | {{ i.compare_jira.data.getFieldAsString('sprint') }}</div></td>
                         <td class="exist"><a href=" {{ i.getField('customfield_10747') }}">{{ i.compare_jira.data.original.fields.summary }} </a></td>
                     {% endif %}
                  {% endif %}
             {% endfor %}
-            {% endif %}
+        {% endif %}
     </tr>
     {% endfor %}
 

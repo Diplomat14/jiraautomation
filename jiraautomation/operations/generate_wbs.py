@@ -152,7 +152,7 @@ class FBSPathBuilder(object):
 
     def build(self, node_tree, cust_field):
         assert isinstance(node_tree, tree_node_type)
-        assert isinstance(node_tree.data, IssueExt)
+        #assert isinstance(node_tree.data, IssueExt)
 
         if node_tree not in self.__cache:
             parents = []
@@ -161,7 +161,7 @@ class FBSPathBuilder(object):
 
             while currentparent != None:
                 assert isinstance(currentparent, tree_node_type)
-                assert isinstance(currentparent.data, IssueExt)
+                #assert isinstance(currentparent.data, IssueExt)
                 parents.insert(0, currentparent)
                 currentparent = currentparent.parent
             else:
@@ -242,99 +242,164 @@ class WBS_Entry(object):
 
     @property
     def perto(self):
-        po = self.__tree_node.data.getFieldAsString(self.__perto_fieldid)
-        return float(po) if po is not "" else None
+        if self.__tree_node.data != None:
+            po = self.__tree_node.data.getFieldAsString(self.__perto_fieldid)
+            return float(po) if po is not "" else None
+        else:
+            return None
 
     @property
     def pertrm(self):
-        pr = self.__tree_node.data.getFieldAsString(self.__pertrm_fieldid)
-        return float(pr) if pr is not "" else None
+        if self.__tree_node.data != None:
+            pr = self.__tree_node.data.getFieldAsString(self.__pertrm_fieldid)
+            return float(pr) if pr is not "" else None
+        else:
+            return None
 
     @property
     def pertp(self):
-        pp = self.__tree_node.data.getFieldAsString(self.__pertp_fieldid)
-        return float(pp) if pp is not "" else None
+        if self.__tree_node.data != None:
+            pp = self.__tree_node.data.getFieldAsString(self.__pertp_fieldid)
+            return float(pp) if pp is not "" else None
+        else:
+            return None
 
     @property
     def pert_calculated(self):
         if self.perto is not None and self.pertrm is not None and self.pertp is not None:
             return (self.perto+(self.pertrm*4)+self.pertp)/6
+        else:
+            return None
 
     @property
     def epic_category(self):
-        return self.__tree_node.data.getFieldAsString(self.__epiccategoryfield)
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getFieldAsString(self.__epiccategoryfield)
+        else:
+            return None
 
     @property
     def assignee(self):
-        return self.__tree_node.data.getFieldAsString('assignee')
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getFieldAsString('assignee')
+        else:
+            return None
 
     @property
     def components(self):
-        comps = self.__tree_node.data.getField('components')
-        return ", ".join(c.name for c in comps) if isinstance(comps, Iterable) else ""
+        if self.__tree_node.data != None:
+            comps = self.__tree_node.data.getField('components')
+            return ", ".join(c.name for c in comps) if isinstance(comps, Iterable) else ""
+        else:
+            return None
 
     @property
     def description(self):
-        return self.__tree_node.data.getFieldAsString('description')
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getFieldAsString('description')
+        else:
+            return None
 
     @property
     def issuetype(self):
-        return self.__tree_node.data.getFieldAsString('issuetype')
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getFieldAsString('issuetype')
+        else:
+            return None
 
     @property
     def key(self):
-        return self.__tree_node.data.getFieldAsString('key')
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getFieldAsString('key')
+        else:
+            return None
 
     @property
     def lastsprint(self):
-        return self.__tree_node.data.getFieldAsString('lastsprint')
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getFieldAsString('lastsprint')
+        else:
+            return None
 
     @property
     def firstsprint(self):
-        return self.__tree_node.data.getFieldAsString('firstsprint')
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getFieldAsString('firstsprint')
+        else:
+            return None
 
     @property
     def sprints(self):
-        all_sprints = self.__tree_node.data.getField('sprints')
-        return ", ".join(c.name for c in all_sprints) if isinstance(all_sprints, Iterable) else ""
+        if self.__tree_node.data != None:
+            all_sprints = self.__tree_node.data.getField('sprints')
+            return ", ".join(c.name for c in all_sprints) if isinstance(all_sprints, Iterable) else ""
+        else:
+            return None
 
     @property
     def status(self):
-        return self.__tree_node.data.getFieldAsString('status')
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getFieldAsString('status')
+        else:
+            return None
 
     @property
     def summary(self):
-        return self.__tree_node.data.getFieldAsString('summary')
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getFieldAsString('summary')
+        else:
+            return None
 
     @property
     # In seconds
     def timeestimate(self):
-        return self.__tree_node.data.getField('timeestimate')
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getField('timeestimate')
+        else:
+            return None
 
     @property
     # In seconds
     def timespent(self):
-        return self.__tree_node.data.getField('timespent')
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getField('timespent')
+        else:
+            return None
 
     @property
     # In seconds
     def original(self):
-        return self.__tree_node.data.getField('timeoriginalestimate')
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getField('timeoriginalestimate')
+        else:
+            return None
 
     def team(self, components):
-        return self.__c2dconverter.team(components)
+        if self.__tree_node.data != None:
+            return self.__c2dconverter.team(components)
+        else:
+            return None
 
     @property
     def path_builder_level(self):
-        return self.__fbspathbuilder.level(self.__tree_node, False)
+        if self.__tree_node.data != None:
+            return self.__fbspathbuilder.level(self.__tree_node, False)
+        else:
+            return None
 
     @property
     def path_builder_build(self):
-        return self.__fbspathbuilder.build(self.__tree_node, False)
+        if self.__tree_node.data != None:
+            return self.__fbspathbuilder.build(self.__tree_node, False)
+        else:
+            return None
 
     @property
     def path_builder_first(self):
-        return self.__fbspathbuilder.parentAsString(self.__tree_node, 1, False)
+        if self.__tree_node.data != None:
+            return self.__fbspathbuilder.parentAsString(self.__tree_node, 1, False)
+        else:
+            return None
 
     @property
     def path_builder_second(self):
@@ -366,11 +431,17 @@ class WBS_Entry(object):
 
     @property
     def parent_id(self):
-        return self.__tree_node.parent.data.getFieldAsString('key')
+        if self.__tree_node.data != None:
+            return self.__tree_node.parent.data.getFieldAsString('key')
+        else:
+            return None
 
     @property
     def custjiralink_field(self):
-        return self.__tree_node.data.getField(self.__custjiralink_field)
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getField(self.__custjiralink_field)
+        else:
+            return None
 
 
 class ComponentToDomainConverter(object):

@@ -72,7 +72,7 @@ class generate_issues_tree(basic_operation):
                 return resulting_tree
 
             except Exception as e:
-                l.error("Exception happened boards search " + str(e))
+                l.error("Exception happened" + str(e))
 
         except Exception as e:
             l.error("Exception happened during connection establishment " + str(e))
@@ -192,7 +192,10 @@ def print_tree(tree_data,l):
 def print_tree_node(tnode, indent, l):
     assert isinstance(tnode, tree_node_type), "tnode is of wrong type"
     sdata = tnode.data
-    name = issue_to_str(sdata)
+    if sdata != None:
+        name = issue_to_str(sdata)
+    else:
+        name = "<Empty>"
     l.msg(indent + name)
 
     if tnode.has_children():

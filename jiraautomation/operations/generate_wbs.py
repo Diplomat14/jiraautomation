@@ -414,24 +414,12 @@ class WBS_Entry(object):
         return self.__fbspathbuilder.parentAsString(self.__tree_node, 4, includeNextLevels)
 
     @property
-    def path_builder_id_first(self):
-        return self.__fbspathbuilder.parentAsString(self.__tree_node, 1, False, True).getFieldAsString('key')
-
-    @property
-    def path_builder_id_second(self):
-        return self.__fbspathbuilder.parentAsString(self.__tree_node, 2, False, True).getFieldAsString('key')
-
-    @property
-    def path_builder_id_third(self):
-        return self.__fbspathbuilder.parentAsString(self.__tree_node, 3, False, True).getFieldAsString('key')
-
-    @property
     def non_wbstypes_mapping(self):
         return self.__nonwbstypesmapping
 
     @property
     def parent_id(self):
-        if self.__tree_node.data != None:
+        if self.__tree_node.data != None and self.__tree_node.parent.data:
             return self.__tree_node.parent.data.getFieldAsString('key')
         else:
             return None

@@ -37,6 +37,10 @@ class generate_wbs(basic_operation):
                                      help='Types that could possibly be shown in FBS Level 4+')
         operation_group.add_argument('-gwbsCUSTLINK', '--generatewbs_CustJiraLink', required=False,
                                      help='Name of the Customer Link Field ')
+        operation_group.add_argument('-gwbsReported', '--generatewbs_Reported', required=False,
+                                     help='Name of the Customer Reported Field')
+        operation_group.add_argument('-gwbsIPType', '--generatewbs_IPType', required=False,
+                                     help='Name of the IP Type Field')
         pass
 
     @staticmethod
@@ -71,9 +75,12 @@ class generate_wbs(basic_operation):
                 nonwbstypesmapping = args.generatewbs_NonWBSTypesMapping
                 epiccategoryfield = args.generatewbs_EpicCategory if hasattr(args, 'generatewbs_EpicCategory') else None
                 perto_field_name = args.generatewbs_PERTO if hasattr(args, 'generatewbs_PERTO') else None
-                pertp_field_name = args.generatewbs_PERTP if hasattr(args, 'generatewbs_PERTO') else None
-                pertrm_field_name = args.generatewbs_PERTR if hasattr(args, 'generatewbs_PERTO') else None
+                pertp_field_name = args.generatewbs_PERTP if hasattr(args, 'generatewbs_PERTP') else None
+                pertrm_field_name = args.generatewbs_PERTR if hasattr(args, 'generatewbs_PERTR') else None
                 custjiralink_field_name = args.generatewbs_CustJiraLink if hasattr(args, 'generatewbs_CustJiraLink') else None
+                reported_field_name = args.generatewbs_Reported if hasattr(args, 'generatewbs_Reported') else None
+                ip_type_field_name = args.generatewbs_IPType if hasattr(args, 'generatewbs_IPType') else None
+
 
                 with open(args.generatewbs_Component2Teams) as f:
                     c2tmap = yaml.load(f, Loader=yaml.Loader)
@@ -97,7 +104,7 @@ class generate_wbs(basic_operation):
                 for issue in issues_list:
                     entry_list.append(
                         WBS_Entry(issue, perto_field_name, pertrm_field_name, pertp_field_name, epiccategoryfield, c2tconverter,
-                                  nonwbstypesmapping,fbspathbuilder,custjiralink_field_name))
+                                  nonwbstypesmapping,fbspathbuilder,custjiralink_field_name, reported_field_name, ip_type_field_name))
                 return entry_list
 
             except Exception as e:
@@ -226,19 +233,24 @@ class FBSPathBuilder(object):
 
 class WBS_Entry(object):
     def __init__(self, tree_node, perto_fieldid, pertrm_fieldid, pertp_fieldid, epiccategoryfield, c2dconverter,
-                 nonwbstypesmapping, fbspathbuilder, custjiralink_field_name):
+                 nonwbstypesmapping, fbspathbuilder, custjiralink_field_name, reported, ip_type):
         self.__tree_node = tree_node
         self.__perto_fieldid = perto_fieldid
         self.__pertrm_fieldid = pertrm_fieldid
         self.__pertp_fieldid = pertp_fieldid
         self.__epiccategoryfield = epiccategoryfield
+        self.__c2dconverter = c2dconverter
         self.__nonwbstypesmapping = nonwbstypesmapping
         self.__fbspathbuilder = fbspathbuilder
-        self.__c2dconverter = c2dconverter
         self.__custjiralink_field = custjiralink_field_name
+        self.__reported = reported
+        self.__ip_type = ip_type
 
-    def __eq__(self, other):
-        return self.summary == other.summary
+    def __hash__(self):
+        return hash(id(self))
+
+    def __eq__(self, x):
+        return x is self
 
     @property
     def perto(self):
@@ -427,7 +439,21 @@ class WBS_Entry(object):
     @property
     def custjiralink_field(self):
         if self.__tree_node.data != None:
-            return self.__tree_node.data.getField(self.__custjiralink_field)
+            return self.__tree_node.data.getFieldAsString(self.__custjiralink_field)
+        else:
+            return None
+
+    @property
+    def customer_reported(self):
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getFieldAsString(self.__reported)
+        else:
+            return None
+
+    @property
+    def ip_type(self):
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getFieldAsString(self.__ip_type)
         else:
             return None
 

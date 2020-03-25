@@ -253,6 +253,10 @@ class WBS_Entry(object):
         return x is self
 
     @property
+    def data(self):
+        return self.__tree_node
+
+    @property
     def perto(self):
         if self.__tree_node.data != None:
             po = self.__tree_node.data.getFieldAsString(self.__perto_fieldid)

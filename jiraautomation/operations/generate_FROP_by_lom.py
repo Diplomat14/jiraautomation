@@ -112,7 +112,7 @@ def create_FROP_by_lom(obj_list, loms, statuses, server, level, lvl_names, colum
 
 
 def additional_columns_data(issue, columns, statuses):
-    values = [mapping[column](issue, statuses) for column in columns]
+    values = [fields_mapping[column](issue, statuses) for column in columns]
     column_data = dict(zip(columns, values))
 
     return column_data

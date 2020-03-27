@@ -16,3 +16,4 @@ register.register_dynamic('GenerateIssuesTree','generate_issues_tree','.generate
 register.register_dynamic('SharepointFiles','get_files_from_sharepoint','.get_files_from_sharepoint','jiraautomation.operations')
 register.register_dynamic('SynchronizeIssue','synchronize_issue','.synchronize_issue','jiraautomation.operations')
 register.register_dynamic('GenerateCustomJiraStr','generate_custom_jira_structure','.generate_custom_jira_structure','jiraautomation.operations')
+register.register_dynamic('GenerateFROPbyLOM', 'generate_FROP_by_lom','.generate_FROP_by_lom', 'jiraautomation.operations')

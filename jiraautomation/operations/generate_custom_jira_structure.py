@@ -2,7 +2,6 @@ from jiraautomation.operations.operation import basic_operation
 import re
 from .generate_issues_tree import generate_issues_tree
 from .generate_wbs import generate_wbs
-from .generate_wbs_html import generate_wbs_html
 
 
 class generate_custom_jira_structure(basic_operation):
@@ -41,13 +40,13 @@ class generate_custom_jira_structure(basic_operation):
 
                 op = generate_issues_tree(l)
                 resulting_tree = op.execute(container, args)
-                arhud_issues = self.issuesToTree(resulting_tree, l, args)
+                issues = self.issuesToTree(resulting_tree, l, args)
                 assignees = get_all_assignee_by_filter(jira, args.generatestruct_ProjName,
                                                         args.generatestruct_Assignee)
-                for i in arhud_issues:
+                for i in issues:
                     check_if_issue_assign_to_specified(i, l, assignees, args)
 
-                op2 = generate_wbs(l, arhud_issues)
+                op2 = generate_wbs(l, issues)
                 jira_structure = op2.execute(container, args)
                 return jira_structure
 
@@ -70,14 +69,13 @@ class generate_custom_jira_structure(basic_operation):
     def processNode(self, node, node_list, l, args):
         node_list.append(node)
         for n in node.children:
-            if get_audi_child_capabilities(n, l, args):
+            if get_child(n, l, args):
                 self.processNode(n, node_list, l, args)
 
 
 def get_all_arhud_epics(issues, args):
     for issue in issues:
         if re.search(args.generatestruct_SummaryFilter.split(' ')[0], issue.data.original.fields.summary):
-            # yield modified_issues_summary(issue)
             yield issue
 
 
@@ -100,9 +98,8 @@ def modified_issues_summary(issue):
     return issue
 
 
-def get_audi_child_capabilities(child, l, args):
+def get_child(child, l, args):
     if re.search(args.generatestruct_SummaryFilter, child.data.original.fields.summary):
-        # return modified_issues_summary(child)
         return child
     elif re.search(' '.join(args.generatestruct_SummaryFilter.split(' ', 2)[:2]), child.data.original.fields.summary):
         l.error("{} task is not impl type".format(child.data.original.key))

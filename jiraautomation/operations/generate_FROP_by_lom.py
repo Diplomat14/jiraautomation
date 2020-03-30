@@ -1,6 +1,6 @@
 from jiraautomation.operations.operation import basic_operation
 from jiraautomation.operations.generate_wbs import generate_wbs, WBS_Entry
-from arcjiraautomation.operations.generate_excel import generate_excel
+from jiraautomation.operations.generate_excel import generate_excel
 from arcjiraautomation.operations.FROP_config import get_loms_values, create_hyperlink, create_jira_url, \
     fields_mapping
 

@@ -3,6 +3,7 @@ import traceback
 import jiraorm.console.command_line
 from jiraautomation.automationcore import automationcore
 from xdev.core.logger import logger
+import yaml
 
 
 #temp
@@ -97,6 +98,19 @@ def get_argument_value(name,fullname):
     else:
         return None
 
+
+def parse_yaml_files(args):
+    for k, v in args.__dict__.items():
+        if not v: continue
+
+        if isinstance(v, str):
+            if v.endswith('.yml') or v.endswith('.yaml'):
+                data = yaml.load(open(v), Loader=yaml.Loader)
+                setattr(args, k, data)
+
+    return args
+
+
 def parse_arguments(parser):
     args = parser.parse_args()
     requested_operation_names = args.operation.split(",")
@@ -108,6 +122,7 @@ def parse_arguments(parser):
         op.parse_arguments(args)
 
     jiraorm.console.command_line.parse_common_operations_arguments(args)
+    parse_yaml_files(args)
 
     return args
 

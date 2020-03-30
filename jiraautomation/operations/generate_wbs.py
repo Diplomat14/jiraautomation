@@ -73,17 +73,14 @@ class generate_wbs(basic_operation):
             try:
                 # Reading and preparing data from command line parameters
                 nonwbstypesmapping = args.generatewbs_NonWBSTypesMapping
-                epiccategoryfield = args.generatewbs_EpicCategory if hasattr(args, 'generatewbs_EpicCategory') else None
-                perto_field_name = args.generatewbs_PERTO if hasattr(args, 'generatewbs_PERTO') else None
-                pertp_field_name = args.generatewbs_PERTP if hasattr(args, 'generatewbs_PERTP') else None
-                pertrm_field_name = args.generatewbs_PERTR if hasattr(args, 'generatewbs_PERTR') else None
-                custjiralink_field_name = args.generatewbs_CustJiraLink if hasattr(args, 'generatewbs_CustJiraLink') else None
-                reported_field_name = args.generatewbs_Reported if hasattr(args, 'generatewbs_Reported') else None
-                ip_type_field_name = args.generatewbs_IPType if hasattr(args, 'generatewbs_IPType') else None
-
-
-                with open(args.generatewbs_Component2Teams) as f:
-                    c2tmap = yaml.load(f, Loader=yaml.Loader)
+                epiccategoryfield = args.generatewbs_EpicCategory if args.generatewbs_EpicCategory else None
+                perto_field_name = args.generatewbs_PERTO if args.generatewbs_PERTO else None
+                pertp_field_name = args.generatewbs_PERTP if args.generatewbs_PERTP else None
+                pertrm_field_name = args.generatewbs_PERTR if args.generatewbs_PERTR else None
+                custjiralink_field_name = args.generatewbs_CustJiraLink if args.generatewbs_CustJiraLink else None
+                reported_field_name = args.generatewbs_Reported if args.generatewbs_Reported else None
+                ip_type_field_name = args.generatewbs_IPType if args.generatewbs_IPType else None
+                c2tmap = args.generatewbs_Component2Teams if args.generatewbs_Component2Teams else None
 
                 # Generating hierarchy tree
                 if self.tree is None:

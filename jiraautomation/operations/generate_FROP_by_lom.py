@@ -3,7 +3,6 @@ from jiraautomation.operations.generate_wbs import generate_wbs, WBS_Entry
 from arcjiraautomation.operations.generate_excel import generate_excel
 from arcjiraautomation.operations.FROP_config import get_loms_values, create_hyperlink, create_jira_url, \
     fields_mapping
-import yaml
 
 
 class generate_FROP_by_lom(basic_operation):
@@ -41,19 +40,16 @@ class generate_FROP_by_lom(basic_operation):
 
             try:
                 server = container.connectionConfig.server
-
-                with open(args.generatefrop_LOMs) as f:
-                    loms = yaml.load(f, Loader=yaml.Loader)
-
-                with open(args.generatefrop_Statuses) as f:
-                    statuses = yaml.load(f, Loader=yaml.Loader)
+                loms = args.generatefrop_LOMs if args.generatefrop_LOMs else {}
+                statuses = args.generatefrop_Statuses if args.generatefrop_Statuses else {}
+                lvl_names = args.generatefrop_LevelsNames.split(',') if args.generatefrop_LevelsNames else None
 
                 op = generate_wbs(l)
                 obj_list = op.execute(container, args)
 
                 attributes = list(loms.keys())
                 level = int(args.generatefrop_LevelsQuantity)
-                lvl_names = [lvl.strip() for lvl in args.generatefrop_LevelsNames.split(',')]
+                lvl_names = [lvl.strip() for lvl in lvl_names if lvl_names]
                 clms = args.generatefrop_AdditionalColumns.split(',') if args.generatefrop_AdditionalColumns else []
 
                 columns = list()
@@ -64,10 +60,10 @@ class generate_FROP_by_lom(basic_operation):
                     else:
                         columns.append(clm)
 
-                obj_list = [FROP_Entry(issue, attributes) for issue in obj_list]
+                issues = [FROP_Entry(issue, attributes) for issue in obj_list]
 
                 l.msg("Generating FROP report")
-                FROP = create_FROP_by_lom(obj_list, loms, statuses, server, level, lvl_names, columns)
+                FROP = create_FROP_by_lom(issues, loms, statuses, server, level, lvl_names, columns)
 
                 op3 = generate_excel(l, FROP, 'FROP (Eng view)', 1)
                 return op3.execute(container, args)

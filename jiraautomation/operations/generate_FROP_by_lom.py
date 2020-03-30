@@ -55,7 +55,14 @@ class generate_FROP_by_lom(basic_operation):
                 level = int(args.generatefrop_LevelsQuantity)
                 lvl_names = [lvl.strip() for lvl in args.generatefrop_LevelsNames.split(',')]
                 clms = args.generatefrop_AdditionalColumns.split(',') if args.generatefrop_AdditionalColumns else []
-                columns = [clm.strip() for clm in clms]
+
+                columns = list()
+                for clm in clms:
+                    clm = clm.strip()
+                    if not fields_mapping.get(clm):
+                        l.error('Unknown column value: {}'.format(clm))
+                    else:
+                        columns.append(clm)
 
                 obj_list = [FROP_Entry(issue, attributes) for issue in obj_list]
 
@@ -134,7 +141,7 @@ def get_levels_data(issue, lvl_columns, level, server):
 
     if issue.path_builder_level == level:
         url = create_jira_url(server, issue.key)
-        values[level - 1] = create_hyperlink(url, issue.summary)
+        values[level - 1] = create_hyperlink(url, issue.summary.strip())
 
     level_data = dict(zip(lvl_columns, values))
     return level_data

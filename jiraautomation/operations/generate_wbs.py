@@ -1,12 +1,11 @@
+from jiraautomation.helper.analyzer import DependencyAnalyzer, DateGetter
 from jiraautomation.operations.operation import basic_operation
 import os
 from .generate_issues_tree import generate_issues_tree
 from xdev.types.complex.tree import tree_type
 from xdev.types.complex.tree import tree_node_type
-from jiraorm.IssueExt import IssueExt
 from jiraorm.EpicExt import EpicExt
 from collections.abc import Iterable
-import yaml
 
 
 class generate_wbs(basic_operation):
@@ -18,7 +17,6 @@ class generate_wbs(basic_operation):
     @staticmethod
     def init_arguments(operation_group):
         generate_issues_tree.init_arguments(operation_group)
-        # generate_issues_tree.init_arguments(operation_group)
         operation_group.add_argument('-gwbsEC', '--generatewbs_EpicCategory', required=False,
                                      help='Name of the Epic Category Field')
         operation_group.add_argument('-gwbsPERTO', '--generatewbs_PERTO', required=False,
@@ -41,6 +39,13 @@ class generate_wbs(basic_operation):
                                      help='Name of the Customer Reported Field')
         operation_group.add_argument('-gwbsIPType', '--generatewbs_IPType', required=False,
                                      help='Name of the IP Type Field')
+        operation_group.add_argument('-gwbsDates', '--generatewbs_Dates', required=False,
+                                     help='Path to YAML file containing dictionary of sprints \
+                                      (or releases) : required date format')
+        operation_group.add_argument('-gwbsDependLink', '--generatewbs_DependentLink', required=False,
+                                     help='Link type between dependent issues')
+        operation_group.add_argument('-gwbsCriticalDate', '--generatewbs_CriticalDateField', required=False,
+                                     help='Name of Critical Date field')
         pass
 
     @staticmethod
@@ -81,6 +86,9 @@ class generate_wbs(basic_operation):
                 reported_field_name = args.generatewbs_Reported if args.generatewbs_Reported else None
                 ip_type_field_name = args.generatewbs_IPType if args.generatewbs_IPType else None
                 c2tmap = args.generatewbs_Component2Teams if args.generatewbs_Component2Teams else None
+                dates_mapping = args.generatewbs_Dates if args.generatewbs_Dates else None
+                dependentlink = args.generatewbs_DependentLink if args.generatewbs_DependentLink else None
+                critical_date = args.generatewbs_CriticalDateField if args.generatewbs_CriticalDateField else None
 
                 # Generating hierarchy tree
                 if self.tree is None:
@@ -98,10 +106,18 @@ class generate_wbs(basic_operation):
                 entry_list = list()
                 fbspathbuilder = FBSPathBuilder(args.generatewbs_WBSTypes)
                 c2tconverter = ComponentToDomainConverter(c2tmap)
+
+                dates = DateGetter(l, dates_mapping, critical_date, 'firstsprint')
+
                 for issue in issues_list:
+                    dependency = DependencyAnalyzer(l, issue)
+                    critical_path = dependency.analyze_critical_path(dependentlink, dates)
+                    critical_tasks_performance = dependency.analyze_dependency(issue, dates)
                     entry_list.append(
-                        WBS_Entry(issue, perto_field_name, pertrm_field_name, pertp_field_name, epiccategoryfield, c2tconverter,
-                                  nonwbstypesmapping,fbspathbuilder,custjiralink_field_name, reported_field_name, ip_type_field_name))
+                        WBS_Entry(issue, perto_field_name, pertrm_field_name, pertp_field_name, epiccategoryfield,
+                                  c2tconverter,
+                                  nonwbstypesmapping, fbspathbuilder, custjiralink_field_name, reported_field_name,
+                                  ip_type_field_name, critical_path, critical_tasks_performance))
                 return entry_list
 
             except Exception as e:
@@ -230,7 +246,7 @@ class FBSPathBuilder(object):
 
 class WBS_Entry(object):
     def __init__(self, tree_node, perto_fieldid, pertrm_fieldid, pertp_fieldid, epiccategoryfield, c2dconverter,
-                 nonwbstypesmapping, fbspathbuilder, custjiralink_field_name, reported, ip_type):
+                 nonwbstypesmapping, fbspathbuilder, custjiralink_field_name, reported, ip_type, critical_path, critical_tasks_performance):
         self.__tree_node = tree_node
         self.__perto_fieldid = perto_fieldid
         self.__pertrm_fieldid = pertrm_fieldid
@@ -242,6 +258,8 @@ class WBS_Entry(object):
         self.__custjiralink_field = custjiralink_field_name
         self.__reported = reported
         self.__ip_type = ip_type
+        self.__critical_path = critical_path
+        self.__critical_tasks_performance = critical_tasks_performance
 
     def __hash__(self):
         return hash(id(self))
@@ -458,6 +476,19 @@ class WBS_Entry(object):
         else:
             return None
 
+    @property
+    def critical_path(self):
+        if self.__tree_node.data != None:
+            return self.__critical_path
+        else:
+            return None
+
+    @property
+    def critical_tasks_performance(self):
+        if self.__tree_node.data != None:
+            return self.__critical_tasks_performance
+        else:
+            return None
 
 class ComponentToDomainConverter(object):
 

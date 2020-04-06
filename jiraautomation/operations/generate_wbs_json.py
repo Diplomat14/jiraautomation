@@ -37,13 +37,15 @@ class generate_wbs_json(basic_operation):
                     keys = ["Type", "ID", "Status", "FBS Level", "FBS Path", "FBS Level 1", "FBS Level 2",
                              "FBS Level 3", "FBS Level 4+", "FBS/WBS Title", "LOM Relation", "Team",
                              "Description", "PERT Opt", "PERT Real", "PERT Pess", "PERT Estimation (calculated)",
-                             "Original est.", "Sprint", "Assignee", "Spent time", "Remaining est."]
+                            "Original est.", "Sprint", "Assignee", "Spent time", "Remaining est.", "Critical Path",
+                            "Critical Tasks Performance"]
 
                     values = [d.issuetype, d.key, d.status, d.path_builder_level, d.path_builder_build,
                            d.path_builder_first, d.path_builder_second, d.path_builder_third, d.path_builder_fourth,
                            d.summary, d.epic_category, d.components,
                            d.description, d.perto, d.pertrm, d.pertp, d.pert_calculated,
-                           d.original, d.firstsprint, d.assignee, d.timespent, d.timeestimate]
+                              d.original, d.firstsprint, d.assignee, d.timespent, d.timeestimate, d.critical_path,
+                              d.critical_tasks_performance]
 
                     d = dict(zip(keys, values))
                     to_json.append(d)

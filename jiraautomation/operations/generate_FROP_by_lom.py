@@ -129,11 +129,11 @@ def get_loms_data(issue, loms):
 
 
 def get_levels_data(issue, lvl_columns, level, server):
-    values = [value.strip() for value in issue.path_builder_build.split('/')]
+    values = [value.strip() for value in issue.path_builder_build.split(' / ')]
     if len(values) < level:
         values.extend([''] * (level - len(values)))
 
-    values[issue.path_builder_level - 1] = issue.summary
+    values[issue.path_builder_level - 1] = issue.summary.strip()
 
     if issue.path_builder_level == level:
         url = create_jira_url(server, issue.key)

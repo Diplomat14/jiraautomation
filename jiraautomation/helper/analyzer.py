@@ -29,7 +29,9 @@ class DependencyAnalyzer:
                 parent_date = dates.get_date(parent.data.getField(parent_d_field))
                 if child_date and parent_date:
                     if child_date > parent_date:
-                        return True
+                        return 'Overdue'
+                    elif child_date == parent_date:
+                        return 'Due date approaching'
 
             return None
 
@@ -37,16 +39,19 @@ class DependencyAnalyzer:
         val = None
 
         if self.__tree_node and isinstance(self.__tree_node.data, EpicExt):
-            depend_children = self.__tree_node.data.getChildren(connection_type, True)
+            depend_issues = self.__tree_node.data.getChildren(connection_type, True)
             issue_date = dates.get_date(
                 self.__tree_node.data.getField(dates.child_date_field))
 
-            if depend_children and issue_date:
-                for child in depend_children:
-                    child_date = dates.get_date(child.getField(dates.child_date_field))
-                    if child_date:
-                        if child_date >= issue_date:
-                            val = True
+            if depend_issues and issue_date:
+                depend_dates = [dates.get_date(
+                    issue.getField(dates.child_date_field)) for issue in depend_issues if dates.get_date(
+                    issue.getField(dates.child_date_field))]
+
+                if any(depend_date < issue_date for depend_date in depend_dates):
+                    val = 'Due date later than due date(s) of dependent element(s)'
+                elif any(depend_date == issue_date for depend_date in depend_dates):
+                    val = 'Due date coincides with due date(s) of dependent element(s)'
 
         return val
 
@@ -83,7 +88,7 @@ class DateGetter:
             else:
                 return self.__mapping[value.name]
 
-        return False
+        return None
 
     def convert_to_datetime(self, value):
         return datetime.strptime(value, '%Y-%m-%d').date()

@@ -107,7 +107,7 @@ class generate_wbs(basic_operation):
                 fbspathbuilder = FBSPathBuilder(args.generatewbs_WBSTypes)
                 c2tconverter = ComponentToDomainConverter(c2tmap)
 
-                dates = DateGetter(l, dates_mapping, critical_date, 'firstsprint')
+                dates = DateGetter(l, dates_mapping, critical_date, 'lastsprint')
 
                 for issue in issues_list:
                     dependency = DependencyAnalyzer(l, issue)

@@ -1,7 +1,7 @@
 from jiraautomation.operations.operation import basic_operation
 from jiraautomation.operations.generate_wbs import generate_wbs, WBS_Entry
 from jiraautomation.operations.generate_excel import generate_excel
-from arcjiraautomation.operations.FROP_config import get_loms_values, create_hyperlink, create_jira_url, \
+from arcjiraautomation.operations.FROP_config import get_loms_values, create_jira_url, \
     fields_mapping
 
 
@@ -14,6 +14,7 @@ class generate_FROP_by_lom(basic_operation):
     @staticmethod
     def init_arguments(operation_group):
         generate_wbs.init_arguments(operation_group)
+        generate_excel.init_arguments(operation_group)
         operation_group.add_argument('-gfropLOMs', '--generatefrop_LOMs', required=False,
                                      help='Path to YAML file containing dictionary of loms')
         operation_group.add_argument('-gfropStatuses', '--generatefrop_Statuses', required=False,
@@ -28,7 +29,7 @@ class generate_FROP_by_lom(basic_operation):
     @staticmethod
     def parse_arguments(args):
         generate_wbs.parse_arguments(args)
-        pass
+        generate_excel.parse_arguments(args)
 
     def __init__(self, iLogger):
         super(generate_FROP_by_lom, self).__init__(iLogger)
@@ -65,8 +66,10 @@ class generate_FROP_by_lom(basic_operation):
                 l.msg("Generating FROP report")
                 FROP = create_FROP_by_lom(issues, loms, statuses, server, level, lvl_names, columns)
 
-                op3 = generate_excel(l, FROP, 'FROP (Eng view)', 1)
-                return op3.execute(container, args)
+                args.generateexcel_Data = FROP
+
+                op2 = generate_excel(l)
+                op2.execute(container, args)
 
             except Exception as e:
                 l.error("Exception happened boards search " + str(e), e)
@@ -137,7 +140,7 @@ def get_levels_data(issue, lvl_columns, level, server):
 
     if issue.path_builder_level == level:
         url = create_jira_url(server, issue.key)
-        values[level - 1] = create_hyperlink(url, issue.summary.strip())
+        values[level - 1] = "{},{}".format(url, issue.summary.strip())
 
     level_data = dict(zip(lvl_columns, values))
     return level_data

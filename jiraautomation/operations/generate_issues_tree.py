@@ -26,15 +26,22 @@ class generate_issues_tree(basic_operation):
                                      help='Link of rule')
         operation_group.add_argument('-dtoget', '--genisstree_IssueDateToGet', required=False,
                                      help='Desired date to get issue data for')
-        operation_group.add_argument('-dtofield', '--genisstree_SortField', required=False,
-                                     help='Field by which data should be sorted')
+        operation_group.add_argument('-dsortrules', '--genisstree_SortRules', required=False,
+                                     help='Fields=sort type(if descending = False) by which data should be sorted')
         pass
 
     @staticmethod
     def parse_arguments(args):
-        # You might want to prepare arguments somehow like:
-        # args.operation = CoreOperation[args.operation]
-        pass
+        d = {}
+        if hasattr(args,'genisstree_SortRules') and args.genisstree_SortRules != None:
+            for s in args.genisstree_SortRules.split(","):
+                splitted = s.split("=")
+                if len(splitted) == 2:
+                    d[splitted[0]] = eval(splitted[1])
+                else:
+                    d[splitted[0]] = ''
+
+        args.genisstree_SortRules = d
 
     def __init__(self, iLogger):
         super(generate_issues_tree,self).__init__(iLogger)
@@ -50,7 +57,7 @@ class generate_issues_tree(basic_operation):
                 startingnodestype = args.genisstree_StartNodeType
                 linkrule = args.genisstree_LinkRule
                 top_request_query = args.query
-                sort_field = args.genisstree_SortField
+                sort_rules = args.genisstree_SortRules
                 l.msg("Requesting issues by query: %s" % top_request_query)
                 if args.genisstree_IssueDateToGet:
                     issues = jira.search_issues_nolim(top_request_query,maxResults=None,expand='changelog,editmeta',date=args.genisstree_IssueDateToGet)
@@ -58,9 +65,7 @@ class generate_issues_tree(basic_operation):
                     issues = jira.search_issues_nolim(top_request_query,maxResults=None)
                 l.msg(str(len(issues)) + " issues found")
 
-                if sort_field:
-                    issues.sort(key=lambda x: x.getFieldAsString(sort_field))
-                graph = convertissues_to_graph(issues,l,container,root_for_not_processed_key, startingnodestype, sort_field)
+                graph = convertissues_to_graph(issues,l,container,root_for_not_processed_key, startingnodestype)
                 starting_nodes = getstartingnodes(graph)
                 graph_root_for_not_processed_data = get_root_for_not_processed()
                 rules = getrules(linkrule)
@@ -69,7 +74,7 @@ class generate_issues_tree(basic_operation):
                 print_grah(graph, l)
 
                 converter = graph_to_tree_converter(l, issue_to_str)
-                resulting_tree = converter.convert(graph, starting_nodes, graph_root_for_not_processed_data, rules)
+                resulting_tree = converter.convert(graph, starting_nodes, graph_root_for_not_processed_data, rules, sort_rules)
 
                 l.msg("Outputting tree")
                 print_tree(resulting_tree, l)
@@ -107,7 +112,7 @@ def getrules(linkrule):
 #######################################################################################
 
 
-def convertissues_to_graph(issues, l, c, root_for_not_processed_key, startingnodestype, sort_field):
+def convertissues_to_graph(issues, l, c, root_for_not_processed_key, startingnodestype):
     global root_for_not_processed
     global startingnodes
     l.msg("Starting issues to graph convertion")
@@ -137,9 +142,6 @@ def convertissues_to_graph(issues, l, c, root_for_not_processed_key, startingnod
         issue_id = issue.getField("id")
         issue_node = id_to_node_map[issue_id]
         links = issue.getLinks()
-        if sort_field:
-            links.sort(key=lambda x: getattr(x.inwardIssue.fields, sort_field) if hasattr(x, 'inwardIssue')
-                                                            else getattr(x.outwardIssue.fields, sort_field))
         l.msg("   It has " + str(len(links)) + " links")
         for link in links:
             name = link.type.name

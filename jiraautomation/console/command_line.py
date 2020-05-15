@@ -30,11 +30,7 @@ def main():
         try:
             l.msg("Operation %s" % str(args.operation))
 
-            op = 'InitJira'
-            op_class = automationcore.get_operation_class(op)
-            op_instance = op_class(l)
-            container = op_instance.execute(args)
-
+            container = jiraorm.console.command_line.create_jira_container(l, args)
             output = None
 
             available_operations = automationcore.get_operation_names()

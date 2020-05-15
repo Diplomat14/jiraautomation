@@ -27,7 +27,7 @@ class generate_issues_tree(basic_operation):
         operation_group.add_argument('-dtoget', '--genisstree_IssueDateToGet', required=False,
                                      help='Desired date to get issue data for')
         operation_group.add_argument('-dsortrules', '--genisstree_SortRules', required=False,
-                                     help='Fields=sort type(if descending = False) by which data should be sorted')
+                                     help='Fields and types (asc, desc) by which data should be sorted')
         pass
 
     @staticmethod
@@ -37,7 +37,8 @@ class generate_issues_tree(basic_operation):
             for s in args.genisstree_SortRules.split(","):
                 splitted = s.split("=")
                 if len(splitted) == 2:
-                    d[splitted[0]] = eval(splitted[1])
+                    assert splitted[1] in ['asc', 'desc', None], "Invalid value for sort type"
+                    d[splitted[0]] = splitted[1]
                 else:
                     d[splitted[0]] = ''
 
@@ -73,7 +74,7 @@ class generate_issues_tree(basic_operation):
                 l.msg("Outputting graph")
                 print_grah(graph, l)
 
-                converter = graph_to_tree_converter(l, issue_to_str)
+                converter = graph_to_tree_converter(l, issue_to_str, get_value_by_field)
                 resulting_tree = converter.convert(graph, starting_nodes, graph_root_for_not_processed_data, rules, sort_rules)
 
                 l.msg("Outputting tree")
@@ -169,6 +170,13 @@ def convertissues_to_graph(issues, l, c, root_for_not_processed_key, startingnod
 
 def issue_to_str(issue):
     return "%s %s " % (str(issue.getField("key")), str(issue.getField("summary")))
+
+def get_value_by_field(issue, field):
+    if issue.hasField(field):
+        return issue.getFieldAsString(field)
+    else:
+        Exception(
+            ' Field {} for sorting not found for {} node'.format(field, issue))
 
 #######################################################################################
 #######################################################################################

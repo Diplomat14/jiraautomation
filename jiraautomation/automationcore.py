@@ -27,7 +27,7 @@ class automationcore(object):
     @staticmethod
     def execute_operations_chain(autocontainer, operations, args):
         l = autocontainer.logger
-        container = autocontainer.jira_init(args)
+        container = autocontainer.init_jira(args)
 
         for operation in operations:
             if operation in automationcore.get_operation_names():
@@ -37,7 +37,7 @@ class automationcore(object):
                 args.data = output
             else:
                 l.warning("Operation %s not implemented" % str(args.operation))
-        return
+        return output
 
 
     #def __init__(self, connectionCfg : j_cfg.ConnectionConfig, securityCfg : j_cfg.SecurityConfig, useMultithreading : bool, poolSize : int, parentLogger:LoggerClass):

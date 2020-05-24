@@ -1,5 +1,4 @@
 from jiraautomation.operations.operation import basic_operation
-from .generate_wbs import generate_wbs
 import json
 
 
@@ -27,8 +26,7 @@ class generate_wbs_json(basic_operation):
             jira = container.getJIRA()
 
             try:
-                op = generate_wbs(l)
-                param = op.execute(container, args)
+                param = args.data
 
                 to_json = list()
                 for d in param:

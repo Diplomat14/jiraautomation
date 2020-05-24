@@ -1,7 +1,6 @@
 from jiraautomation.helper.analyzer import DependencyAnalyzer, DateGetter
 from jiraautomation.operations.operation import basic_operation
 import os
-from .generate_issues_tree import generate_issues_tree
 from xdev.types.complex.tree import tree_type
 from xdev.types.complex.tree import tree_node_type
 from jiraorm.EpicExt import EpicExt
@@ -89,8 +88,7 @@ class generate_wbs(basic_operation):
 
                 # Generating hierarchy tree
                 if self.tree is None:
-                    op = generate_issues_tree(l)
-                    resulting_tree = op.execute(container, args)
+                    resulting_tree = args.data
 
                     # Collapsing hierarchy tree to a list
                     expandIssues = False

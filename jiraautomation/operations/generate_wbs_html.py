@@ -1,7 +1,6 @@
 from jiraautomation.operations.operation import basic_operation
 from jinja2.loaders import FileSystemLoader
 from jinja2.environment import Environment
-from .generate_wbs import generate_wbs
 import os
 
 
@@ -29,8 +28,7 @@ class generate_wbs_html(basic_operation):
             jira = container.getJIRA()
 
             try:
-                op = generate_wbs(l)
-                param_wbsentry = op.execute(container, args)
+                param_wbsentry = args.data
 
                 env = Environment()
 

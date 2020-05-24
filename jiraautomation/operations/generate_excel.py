@@ -41,7 +41,7 @@ class generate_excel(basic_operation):
         try:
 
             try:
-                df = pd.DataFrame(args.generateexcel_Data)
+                df = pd.DataFrame(args.data)
                 if all(isinstance(clm, tuple) for clm in df.columns.values):
                     df.columns = pd.MultiIndex.from_tuples(df.columns)
 

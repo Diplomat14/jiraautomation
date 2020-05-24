@@ -1,6 +1,5 @@
 from jiraautomation.operations.operation import basic_operation
-from jiraautomation.operations.generate_wbs import generate_wbs, WBS_Entry
-from jiraautomation.operations.generate_excel import generate_excel
+from jiraautomation.operations.generate_wbs import WBS_Entry
 from arcjiraautomation.operations.FROP_config import get_loms_values, create_jira_url, \
     fields_mapping
 
@@ -42,8 +41,7 @@ class generate_FROP_by_lom(basic_operation):
                 statuses = args.generatefrop_Statuses if args.generatefrop_Statuses else {}
                 lvl_names = args.generatefrop_LevelsNames.split(',') if args.generatefrop_LevelsNames else None
 
-                op = generate_wbs(l)
-                obj_list = op.execute(container, args)
+                obj_list = args.data
 
                 attributes = list(loms.keys())
                 level = int(args.generatefrop_LevelsQuantity)
@@ -63,10 +61,8 @@ class generate_FROP_by_lom(basic_operation):
                 l.msg("Generating FROP report")
                 FROP = create_FROP_by_lom(issues, loms, statuses, server, level, lvl_names, columns)
 
-                args.generateexcel_Data = FROP
+                return FROP
 
-                op2 = generate_excel(l)
-                return op2.execute(container, args)
 
             except Exception as e:
                 l.error("Exception happened boards search " + str(e), e)

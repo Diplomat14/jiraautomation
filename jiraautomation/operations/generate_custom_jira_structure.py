@@ -12,7 +12,6 @@ class generate_custom_jira_structure(basic_operation):
 
     @staticmethod
     def init_arguments(operation_group):
-        generate_wbs.init_arguments(operation_group)
         operation_group.add_argument('-gsPrName', '--generatestruct_ProjName', required=False,
                                      help='Desired project name')
         operation_group.add_argument('-gsAssignee', '--generatestruct_Assignee', required=False,
@@ -25,7 +24,6 @@ class generate_custom_jira_structure(basic_operation):
 
     @staticmethod
     def parse_arguments(args):
-        generate_wbs.parse_arguments(args)
         return args
 
     def __init__(self, iLogger):

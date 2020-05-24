@@ -17,7 +17,8 @@ class AutoContainer:
     def logger(self):
         return self.__logger
 
-    def __setstate__(self, state):
+    @logger.setter
+    def logger(self, state):
         self.__logger = state['__logger']
 
     def init_jira(self, args):

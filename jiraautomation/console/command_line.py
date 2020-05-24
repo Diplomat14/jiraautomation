@@ -1,9 +1,11 @@
 import argparse
 import jiraorm.console.command_line
 from jiraautomation.automationcore import automationcore
+from jiraautomation.automationcontainer import AutoContainer
 from jiraautomation.operations.init_jira import init_jira
 from xdev.core.logger import logger
 import yaml
+import os
 
 
 #temp
@@ -30,19 +32,10 @@ def main():
         try:
             l.msg("Operation %s" % str(args.operation))
 
-            container = jiraorm.console.command_line.create_jira_container(l, args)
-            output = None
+            autocontainer = AutoContainer(l)
 
-            available_operations = automationcore.get_operation_names()
             requested_operation_names = args.operation.split(',')
-            for operation in requested_operation_names:
-                if operation in available_operations:
-                    op_class = automationcore.get_operation_class(operation)
-                    op_instance = op_class(l)
-                    output = op_instance.execute(container, args)
-                    args.data = output
-                else:
-                    l.warning("Operation %s not implemented" % str(args.operation))
+            output = automationcore.execute_operations_chain(autocontainer, requested_operation_names, args)
 
             if output != None and args.output != None:
                 with open(args.output, "w", encoding='utf-8') as f:
@@ -74,18 +67,10 @@ def init_arguments():
     operations_group.add_argument('-data', '--data', required=False,
                                   help='Output data after operation execution')
     # Reusing common arguments for operation (like query, fields) from orm console
-    operations_group = jiraorm.console.command_line.init_common_operations_arguments(operations_group)
+    jiraorm.console.command_line.init_common_operations_arguments(operations_group)
 
     available_operations = automationcore.get_operation_names()
-    if requested_operation_names != None:
-        requested_operation_names = requested_operation_names.split(",")
-    else:
-        requested_operation_names = available_operations
-
-    for requested_operation in requested_operation_names:
-        # parsing only for requested operation
-        assert requested_operation in available_operations,\
-            "Requested operation not found althpugh argarse already checked this."
+    for requested_operation in available_operations:
         op = automationcore.get_operation_class(requested_operation)
         g = parser.add_argument_group('Options of operation ' + op.name())
         op.init_arguments(g)
@@ -117,12 +102,8 @@ def parse_yaml_files(args):
 
 def parse_arguments(parser):
     args = parser.parse_args()
-    requested_operation_names = args.operation.split(",")
     available_operations = automationcore.get_operation_names()
-    for requested_operation in requested_operation_names:
-        # parsing only for requested operation
-        assert requested_operation in available_operations, \
-            "Requested operation not found althpugh argarse already checked this."
+    for requested_operation in available_operations:
         op = automationcore.get_operation_class(requested_operation)
         op.parse_arguments(args)
 

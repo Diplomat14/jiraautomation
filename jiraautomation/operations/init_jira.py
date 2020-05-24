@@ -25,7 +25,7 @@ class init_jira(basic_operation):
     def __init__(self, iLogger):
         super(init_jira, self).__init__(iLogger)
 
-    def execute(self, args):
+    def execute(self, autocontainer, args):
         l = self.logger
 
         try:

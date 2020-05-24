@@ -9,7 +9,7 @@ class get_files_from_sharepoint(basic_operation):
 
     @staticmethod
     def name():
-        return "SharepointFiles"
+        return "GetSharepointFiles"
 
     @staticmethod
     def init_arguments(operation_group):
@@ -24,7 +24,7 @@ class get_files_from_sharepoint(basic_operation):
 
     @staticmethod
     def parse_arguments(args):
-        return args
+        pass
 
     def __init__(self, iLogger):
         super(get_files_from_sharepoint, self).__init__(iLogger)
@@ -33,15 +33,16 @@ class get_files_from_sharepoint(basic_operation):
         l = self.logger
 
         try:
-            pass
+
             try:
                 ctx_auth = AuthenticationContext(url=args.sharepointurl)
                 if ctx_auth.acquire_token_for_user(username=args.sharepointusername,
                                                    password=args.sharepointpass):
                     ctx = ClientContext(args.sharepointurl, ctx_auth)
-                    download_data_from_sharepoint(args, ctx)
+                    return download_data_from_sharepoint(args, ctx)
                 else:
                     print(ctx_auth.get_last_error())
+                    return
 
             except Exception as e:
                 l.error("Exception happened boards search " + str(e))
@@ -54,6 +55,8 @@ def download_data_from_sharepoint(args, context):
     with open(args.output, "wb") as output_file:
         response = File.open_binary(context, args.sharepointfpath)
         output_file.write(response.content)
+
+    return args.output
 
 
 

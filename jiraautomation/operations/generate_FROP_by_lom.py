@@ -13,8 +13,6 @@ class generate_FROP_by_lom(basic_operation):
 
     @staticmethod
     def init_arguments(operation_group):
-        generate_wbs.init_arguments(operation_group)
-        generate_excel.init_arguments(operation_group)
         operation_group.add_argument('-gfropLOMs', '--generatefrop_LOMs', required=False,
                                      help='Path to YAML file containing dictionary of loms')
         operation_group.add_argument('-gfropStatuses', '--generatefrop_Statuses', required=False,
@@ -28,8 +26,7 @@ class generate_FROP_by_lom(basic_operation):
 
     @staticmethod
     def parse_arguments(args):
-        generate_wbs.parse_arguments(args)
-        generate_excel.parse_arguments(args)
+        pass
 
     def __init__(self, iLogger):
         super(generate_FROP_by_lom, self).__init__(iLogger)
@@ -69,7 +66,7 @@ class generate_FROP_by_lom(basic_operation):
                 args.generateexcel_Data = FROP
 
                 op2 = generate_excel(l)
-                op2.execute(container, args)
+                return op2.execute(container, args)
 
             except Exception as e:
                 l.error("Exception happened boards search " + str(e), e)

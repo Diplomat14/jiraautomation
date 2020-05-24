@@ -16,7 +16,6 @@ class generate_wbs(basic_operation):
 
     @staticmethod
     def init_arguments(operation_group):
-        generate_issues_tree.init_arguments(operation_group)
         operation_group.add_argument('-gwbsEC', '--generatewbs_EpicCategory', required=False,
                                      help='Name of the Epic Category Field')
         operation_group.add_argument('-gwbsPERTO', '--generatewbs_PERTO', required=False,
@@ -50,8 +49,6 @@ class generate_wbs(basic_operation):
 
     @staticmethod
     def parse_arguments(args):
-        generate_issues_tree.parse_arguments(args)
-        # generate_issues_tree.parse_arguments(args)
         dict = {}
         if hasattr(args, 'generatewbs_NonWBSTypesMapping') and args.generatewbs_NonWBSTypesMapping != None:
             for s in args.generatewbs_NonWBSTypesMapping.split(","):

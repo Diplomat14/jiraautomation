@@ -17,13 +17,12 @@ class upload_files_to_sharepoint(basic_operation):
 
     @staticmethod
     def init_arguments(operation_group):
-        get_files_from_sharepoint.init_arguments(operation_group)
         operation_group.add_argument('-uplshr_checkin', '--uplshr_checkintype', required=False,
                                      help='Type of file check in ')
 
     @staticmethod
     def parse_arguments(args):
-        get_files_from_sharepoint.parse_arguments(args)
+        pass
 
     def __init__(self, iLogger):
         super(upload_files_to_sharepoint, self).__init__(iLogger)

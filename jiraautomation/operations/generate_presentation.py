@@ -15,7 +15,6 @@ class generate_presentation(basic_operation):
 
     @staticmethod
     def init_arguments(operation_group):
-        generate_wbs.init_arguments(operation_group)
         operation_group.add_argument('-genpr_Layout', '--generatepr_Layout', required=False,
                                      help='Number of layout to use')
         operation_group.add_argument('-genpr_FontSize', '--generatepr_FontSize', required=False,
@@ -24,7 +23,7 @@ class generate_presentation(basic_operation):
 
     @staticmethod
     def parse_arguments(args):
-        generate_wbs.parse_arguments(args)
+        pass
 
     def __init__(self, iLogger, filename):
         super().__init__(iLogger)

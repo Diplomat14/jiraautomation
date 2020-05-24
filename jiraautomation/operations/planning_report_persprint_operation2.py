@@ -23,14 +23,12 @@ class planning_report_persprint_operation2(basic_operation):
 
     @staticmethod
     def init_arguments(operation_group):
-        # generate_issues_tree.init_arguments(operation_group)
         #operation_group.add_argument('-lbNP', '--listboards_namepart', required=False,
         #                                  help='Part of the name to use as a filter searching for boards')
         pass
 
     @staticmethod
     def parse_arguments(args):
-        # generate_issues_tree.parse_arguments(args)
         # You might want to prepare arguments somehow like:
         # args.operation = CoreOperation[args.operation]
         pass

@@ -1,6 +1,8 @@
 from jiraautomation.operations.operation import  basic_operation
 from jiraorm.IssueExt import IssueExt
 import json
+import csv
+
 
 class export_issues_as_json(basic_operation):
 
@@ -12,6 +14,8 @@ class export_issues_as_json(basic_operation):
     def init_arguments(operation_group):
         #operation_group.add_argument('-ej', '--listboards_namepart', required=False,
         #                                  help='Part of the name to use as a filter searching for boards')
+        operation_group.add_argument('-eiCSVoutput', '--expissue_CSVoutput', required=False,
+                                      help='Path to csv output')
         pass
 
     @staticmethod
@@ -31,12 +35,20 @@ class export_issues_as_json(basic_operation):
 
             try:
                 request_query = args.query
-                fields = args.fields
-                #top_request_query = 'project = %s AND issuetype = "%s" ORDER BY updated DESC' % (projectId, topIssueType)
-                issues = jira.search_issues_nolim(request_query)
+                extra_output = args.expissue_CSVoutput
+
+                all_fields = list(jira._fields.keys())
+                # all_fields = [field['name'] for field in jira.fields()]
+                fields = args.fields if args.fields else all_fields
+
+                issues = jira.search_issues_nolim(request_query, maxResults=None)
                 l.msg(str(len(issues)) + " issues found")
 
-                json = self.issues_to_json(issues,fields)
+                json = self.issues_to_json(issues, fields)
+
+                if extra_output:
+                    issues_to_csv(json, extra_output)
+                    l.msg('Extra export to {} was completed'.format(extra_output))
 
                 return json
 
@@ -69,6 +81,15 @@ class export_issues_as_json(basic_operation):
                 # TODO: Process complex objects
                 issue_dict[field] = str(issue.getField(field))
             else:
-                self.logger.warning('Issue has no field %s' % field)
+                self.logger.warning('Issue {} has no field {}'.format(issue.getField('key'), field))
 
         return issue_dict
+
+
+def issues_to_csv(json_data, filename):
+    outputFile = open(filename, 'w')
+    data = json.loads(json_data)
+    output = csv.writer(outputFile)
+    output.writerow(data[0].keys())
+    for row in data:
+        output.writerow(row.values())

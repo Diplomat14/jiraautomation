@@ -1,12 +1,11 @@
+from jiraautomation.helper.analyzer import DependencyAnalyzer, DateGetter
 from jiraautomation.operations.operation import basic_operation
 import os
 from .generate_issues_tree import generate_issues_tree
 from xdev.types.complex.tree import tree_type
 from xdev.types.complex.tree import tree_node_type
-from jiraorm.IssueExt import IssueExt
 from jiraorm.EpicExt import EpicExt
 from collections.abc import Iterable
-import yaml
 
 
 class generate_wbs(basic_operation):
@@ -18,7 +17,6 @@ class generate_wbs(basic_operation):
     @staticmethod
     def init_arguments(operation_group):
         generate_issues_tree.init_arguments(operation_group)
-        # generate_issues_tree.init_arguments(operation_group)
         operation_group.add_argument('-gwbsEC', '--generatewbs_EpicCategory', required=False,
                                      help='Name of the Epic Category Field')
         operation_group.add_argument('-gwbsPERTO', '--generatewbs_PERTO', required=False,
@@ -37,6 +35,17 @@ class generate_wbs(basic_operation):
                                      help='Types that could possibly be shown in FBS Level 4+')
         operation_group.add_argument('-gwbsCUSTLINK', '--generatewbs_CustJiraLink', required=False,
                                      help='Name of the Customer Link Field ')
+        operation_group.add_argument('-gwbsReported', '--generatewbs_Reported', required=False,
+                                     help='Name of the Customer Reported Field')
+        operation_group.add_argument('-gwbsIPType', '--generatewbs_IPType', required=False,
+                                     help='Name of the IP Type Field')
+        operation_group.add_argument('-gwbsDates', '--generatewbs_Dates', required=False,
+                                     help='Path to YAML file containing dictionary of sprints \
+                                      (or releases) : required date format')
+        operation_group.add_argument('-gwbsDependLink', '--generatewbs_DependentLink', required=False,
+                                     help='Link type between dependent issues')
+        operation_group.add_argument('-gwbsCriticalDate', '--generatewbs_CriticalDateField', required=False,
+                                     help='Name of Critical Date field')
         pass
 
     @staticmethod
@@ -69,14 +78,17 @@ class generate_wbs(basic_operation):
             try:
                 # Reading and preparing data from command line parameters
                 nonwbstypesmapping = args.generatewbs_NonWBSTypesMapping
-                epiccategoryfield = args.generatewbs_EpicCategory if hasattr(args, 'generatewbs_EpicCategory') else None
-                perto_field_name = args.generatewbs_PERTO if hasattr(args, 'generatewbs_PERTO') else None
-                pertp_field_name = args.generatewbs_PERTP if hasattr(args, 'generatewbs_PERTO') else None
-                pertrm_field_name = args.generatewbs_PERTR if hasattr(args, 'generatewbs_PERTO') else None
-                custjiralink_field_name = args.generatewbs_CustJiraLink if hasattr(args, 'generatewbs_CustJiraLink') else None
-
-                with open(args.generatewbs_Component2Teams) as f:
-                    c2tmap = yaml.load(f, Loader=yaml.Loader)
+                epiccategoryfield = args.generatewbs_EpicCategory if args.generatewbs_EpicCategory else None
+                perto_field_name = args.generatewbs_PERTO if args.generatewbs_PERTO else None
+                pertp_field_name = args.generatewbs_PERTP if args.generatewbs_PERTP else None
+                pertrm_field_name = args.generatewbs_PERTR if args.generatewbs_PERTR else None
+                custjiralink_field_name = args.generatewbs_CustJiraLink if args.generatewbs_CustJiraLink else None
+                reported_field_name = args.generatewbs_Reported if args.generatewbs_Reported else None
+                ip_type_field_name = args.generatewbs_IPType if args.generatewbs_IPType else None
+                c2tmap = args.generatewbs_Component2Teams if args.generatewbs_Component2Teams else None
+                dates_mapping = args.generatewbs_Dates if args.generatewbs_Dates else None
+                dependentlink = args.generatewbs_DependentLink if args.generatewbs_DependentLink else None
+                critical_date = args.generatewbs_CriticalDateField if args.generatewbs_CriticalDateField else None
 
                 # Generating hierarchy tree
                 if self.tree is None:
@@ -94,10 +106,18 @@ class generate_wbs(basic_operation):
                 entry_list = list()
                 fbspathbuilder = FBSPathBuilder(args.generatewbs_WBSTypes)
                 c2tconverter = ComponentToDomainConverter(c2tmap)
+
+                dates = DateGetter(l, dates_mapping, critical_date, 'lastsprint')
+
                 for issue in issues_list:
+                    dependency = DependencyAnalyzer(l, issue)
+                    critical_path = dependency.analyze_critical_path(dependentlink, dates)
+                    critical_tasks_performance = dependency.analyze_dependency(issue, dates)
                     entry_list.append(
-                        WBS_Entry(issue, perto_field_name, pertrm_field_name, pertp_field_name, epiccategoryfield, c2tconverter,
-                                  nonwbstypesmapping,fbspathbuilder,custjiralink_field_name))
+                        WBS_Entry(issue, perto_field_name, pertrm_field_name, pertp_field_name, epiccategoryfield,
+                                  c2tconverter,
+                                  nonwbstypesmapping, fbspathbuilder, custjiralink_field_name, reported_field_name,
+                                  ip_type_field_name, critical_path, critical_tasks_performance))
                 return entry_list
 
             except Exception as e:
@@ -152,7 +172,7 @@ class FBSPathBuilder(object):
 
     def build(self, node_tree, cust_field):
         assert isinstance(node_tree, tree_node_type)
-        assert isinstance(node_tree.data, IssueExt)
+        #assert isinstance(node_tree.data, IssueExt)
 
         if node_tree not in self.__cache:
             parents = []
@@ -161,7 +181,7 @@ class FBSPathBuilder(object):
 
             while currentparent != None:
                 assert isinstance(currentparent, tree_node_type)
-                assert isinstance(currentparent.data, IssueExt)
+                #assert isinstance(currentparent.data, IssueExt)
                 parents.insert(0, currentparent)
                 currentparent = currentparent.parent
             else:
@@ -226,115 +246,191 @@ class FBSPathBuilder(object):
 
 class WBS_Entry(object):
     def __init__(self, tree_node, perto_fieldid, pertrm_fieldid, pertp_fieldid, epiccategoryfield, c2dconverter,
-                 nonwbstypesmapping, fbspathbuilder, custjiralink_field_name):
+                 nonwbstypesmapping, fbspathbuilder, custjiralink_field_name, reported, ip_type, critical_path, critical_tasks_performance):
         self.__tree_node = tree_node
         self.__perto_fieldid = perto_fieldid
         self.__pertrm_fieldid = pertrm_fieldid
         self.__pertp_fieldid = pertp_fieldid
         self.__epiccategoryfield = epiccategoryfield
+        self.__c2dconverter = c2dconverter
         self.__nonwbstypesmapping = nonwbstypesmapping
         self.__fbspathbuilder = fbspathbuilder
-        self.__c2dconverter = c2dconverter
         self.__custjiralink_field = custjiralink_field_name
+        self.__reported = reported
+        self.__ip_type = ip_type
+        self.__critical_path = critical_path
+        self.__critical_tasks_performance = critical_tasks_performance
 
-    def __eq__(self, other):
-        return self.summary == other.summary
+    def __hash__(self):
+        return hash(id(self))
+
+    def __eq__(self, x):
+        return x is self
+
+    @property
+    def data(self):
+        return self.__tree_node
 
     @property
     def perto(self):
-        po = self.__tree_node.data.getFieldAsString(self.__perto_fieldid)
-        return float(po) if po is not "" else None
+        if self.__tree_node.data != None:
+            po = self.__tree_node.data.getFieldAsString(self.__perto_fieldid)
+            return float(po) if po is not "" else None
+        else:
+            return None
 
     @property
     def pertrm(self):
-        pr = self.__tree_node.data.getFieldAsString(self.__pertrm_fieldid)
-        return float(pr) if pr is not "" else None
+        if self.__tree_node.data != None:
+            pr = self.__tree_node.data.getFieldAsString(self.__pertrm_fieldid)
+            return float(pr) if pr is not "" else None
+        else:
+            return None
 
     @property
     def pertp(self):
-        pp = self.__tree_node.data.getFieldAsString(self.__pertp_fieldid)
-        return float(pp) if pp is not "" else None
+        if self.__tree_node.data != None:
+            pp = self.__tree_node.data.getFieldAsString(self.__pertp_fieldid)
+            return float(pp) if pp is not "" else None
+        else:
+            return None
 
     @property
     def pert_calculated(self):
         if self.perto is not None and self.pertrm is not None and self.pertp is not None:
             return (self.perto+(self.pertrm*4)+self.pertp)/6
+        else:
+            return None
 
     @property
     def epic_category(self):
-        return self.__tree_node.data.getFieldAsString(self.__epiccategoryfield)
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getFieldAsString(self.__epiccategoryfield)
+        else:
+            return None
 
     @property
     def assignee(self):
-        return self.__tree_node.data.getFieldAsString('assignee')
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getFieldAsString('assignee')
+        else:
+            return None
 
     @property
     def components(self):
-        comps = self.__tree_node.data.getField('components')
-        return ", ".join(c.name for c in comps) if isinstance(comps, Iterable) else ""
+        if self.__tree_node.data != None:
+            comps = self.__tree_node.data.getField('components')
+            return ", ".join(c.name for c in comps) if isinstance(comps, Iterable) else ""
+        else:
+            return None
 
     @property
     def description(self):
-        return self.__tree_node.data.getFieldAsString('description')
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getFieldAsString('description')
+        else:
+            return None
 
     @property
     def issuetype(self):
-        return self.__tree_node.data.getFieldAsString('issuetype')
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getFieldAsString('issuetype')
+        else:
+            return None
 
     @property
     def key(self):
-        return self.__tree_node.data.getFieldAsString('key')
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getFieldAsString('key')
+        else:
+            return None
 
     @property
     def lastsprint(self):
-        return self.__tree_node.data.getFieldAsString('lastsprint')
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getFieldAsString('lastsprint')
+        else:
+            return None
 
     @property
     def firstsprint(self):
-        return self.__tree_node.data.getFieldAsString('firstsprint')
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getFieldAsString('firstsprint')
+        else:
+            return None
 
     @property
     def sprints(self):
-        all_sprints = self.__tree_node.data.getField('sprints')
-        return ", ".join(c.name for c in all_sprints) if isinstance(all_sprints, Iterable) else ""
+        if self.__tree_node.data != None:
+            all_sprints = self.__tree_node.data.getField('sprints')
+            return ", ".join(c.name for c in all_sprints) if isinstance(all_sprints, Iterable) else ""
+        else:
+            return None
 
     @property
     def status(self):
-        return self.__tree_node.data.getFieldAsString('status')
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getFieldAsString('status')
+        else:
+            return None
 
     @property
     def summary(self):
-        return self.__tree_node.data.getFieldAsString('summary')
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getFieldAsString('summary')
+        else:
+            return None
 
     @property
     # In seconds
     def timeestimate(self):
-        return self.__tree_node.data.getField('timeestimate')
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getField('timeestimate')
+        else:
+            return None
 
     @property
     # In seconds
     def timespent(self):
-        return self.__tree_node.data.getField('timespent')
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getField('timespent')
+        else:
+            return None
 
     @property
     # In seconds
     def original(self):
-        return self.__tree_node.data.getField('timeoriginalestimate')
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getField('timeoriginalestimate')
+        else:
+            return None
 
     def team(self, components):
-        return self.__c2dconverter.team(components)
+        if self.__tree_node.data != None:
+            return self.__c2dconverter.team(components)
+        else:
+            return None
 
     @property
     def path_builder_level(self):
-        return self.__fbspathbuilder.level(self.__tree_node, False)
+        if self.__tree_node.data != None:
+            return self.__fbspathbuilder.level(self.__tree_node, False)
+        else:
+            return None
 
     @property
     def path_builder_build(self):
-        return self.__fbspathbuilder.build(self.__tree_node, False)
+        if self.__tree_node.data != None:
+            return self.__fbspathbuilder.build(self.__tree_node, False)
+        else:
+            return None
 
     @property
     def path_builder_first(self):
-        return self.__fbspathbuilder.parentAsString(self.__tree_node, 1, False)
+        if self.__tree_node.data != None:
+            return self.__fbspathbuilder.parentAsString(self.__tree_node, 1, False)
+        else:
+            return None
 
     @property
     def path_builder_second(self):
@@ -349,29 +445,50 @@ class WBS_Entry(object):
         return self.__fbspathbuilder.parentAsString(self.__tree_node, 4, includeNextLevels)
 
     @property
-    def path_builder_id_first(self):
-        return self.__fbspathbuilder.parentAsString(self.__tree_node, 1, False, True).getFieldAsString('key')
-
-    @property
-    def path_builder_id_second(self):
-        return self.__fbspathbuilder.parentAsString(self.__tree_node, 2, False, True).getFieldAsString('key')
-
-    @property
-    def path_builder_id_third(self):
-        return self.__fbspathbuilder.parentAsString(self.__tree_node, 3, False, True).getFieldAsString('key')
-
-    @property
     def non_wbstypes_mapping(self):
         return self.__nonwbstypesmapping
 
     @property
     def parent_id(self):
-        return self.__tree_node.parent.data.getFieldAsString('key')
+        if self.__tree_node.data != None and self.__tree_node.parent.data:
+            return self.__tree_node.parent.data.getFieldAsString('key')
+        else:
+            return None
 
     @property
     def custjiralink_field(self):
-        return self.__tree_node.data.getField(self.__custjiralink_field)
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getFieldAsString(self.__custjiralink_field)
+        else:
+            return None
 
+    @property
+    def customer_reported(self):
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getFieldAsString(self.__reported)
+        else:
+            return None
+
+    @property
+    def ip_type(self):
+        if self.__tree_node.data != None:
+            return self.__tree_node.data.getFieldAsString(self.__ip_type)
+        else:
+            return None
+
+    @property
+    def critical_path(self):
+        if self.__tree_node.data != None:
+            return self.__critical_path
+        else:
+            return None
+
+    @property
+    def critical_tasks_performance(self):
+        if self.__tree_node.data != None:
+            return self.__critical_tasks_performance
+        else:
+            return None
 
 class ComponentToDomainConverter(object):
 

@@ -26,13 +26,23 @@ class generate_issues_tree(basic_operation):
                                      help='Link of rule')
         operation_group.add_argument('-dtoget', '--genisstree_IssueDateToGet', required=False,
                                      help='Desired date to get issue data for')
+        operation_group.add_argument('-dsortrules', '--genisstree_SortRules', required=False,
+                                     help='Fields and types (asc, desc) by which data should be sorted')
         pass
 
     @staticmethod
     def parse_arguments(args):
-        # You might want to prepare arguments somehow like:
-        # args.operation = CoreOperation[args.operation]
-        pass
+        d = {}
+        if hasattr(args,'genisstree_SortRules') and args.genisstree_SortRules != None:
+            for s in args.genisstree_SortRules.split(","):
+                splitted = s.split("=")
+                if len(splitted) == 2:
+                    assert splitted[1] in ['asc', 'desc', None], "Invalid value for sort type"
+                    d[splitted[0]] = splitted[1]
+                else:
+                    d[splitted[0]] = ''
+
+        args.genisstree_SortRules = d
 
     def __init__(self, iLogger):
         super(generate_issues_tree,self).__init__(iLogger)
@@ -48,6 +58,7 @@ class generate_issues_tree(basic_operation):
                 startingnodestype = args.genisstree_StartNodeType
                 linkrule = args.genisstree_LinkRule
                 top_request_query = args.query
+                sort_rules = args.genisstree_SortRules
                 l.msg("Requesting issues by query: %s" % top_request_query)
                 if args.genisstree_IssueDateToGet:
                     issues = jira.search_issues_nolim(top_request_query,maxResults=None,expand='changelog,editmeta',date=args.genisstree_IssueDateToGet)
@@ -63,8 +74,8 @@ class generate_issues_tree(basic_operation):
                 l.msg("Outputting graph")
                 print_grah(graph, l)
 
-                converter = graph_to_tree_converter(l, issue_to_str)
-                resulting_tree = converter.convert(graph, starting_nodes, graph_root_for_not_processed_data, rules)
+                converter = graph_to_tree_converter(l, issue_to_str, get_value_by_field)
+                resulting_tree = converter.convert(graph, starting_nodes, graph_root_for_not_processed_data, rules, sort_rules)
 
                 l.msg("Outputting tree")
                 print_tree(resulting_tree, l)
@@ -72,7 +83,7 @@ class generate_issues_tree(basic_operation):
                 return resulting_tree
 
             except Exception as e:
-                l.error("Exception happened boards search " + str(e))
+                l.error("Exception happened" + str(e))
 
         except Exception as e:
             l.error("Exception happened during connection establishment " + str(e))
@@ -160,6 +171,13 @@ def convertissues_to_graph(issues, l, c, root_for_not_processed_key, startingnod
 def issue_to_str(issue):
     return "%s %s " % (str(issue.getField("key")), str(issue.getField("summary")))
 
+def get_value_by_field(issue, field):
+    if issue.hasField(field):
+        return issue.getFieldAsString(field)
+    else:
+        Exception(
+            ' Field {} for sorting not found for {} node'.format(field, issue))
+
 #######################################################################################
 #######################################################################################
 #######################################################################################
@@ -192,7 +210,10 @@ def print_tree(tree_data,l):
 def print_tree_node(tnode, indent, l):
     assert isinstance(tnode, tree_node_type), "tnode is of wrong type"
     sdata = tnode.data
-    name = issue_to_str(sdata)
+    if sdata != None:
+        name = issue_to_str(sdata)
+    else:
+        name = "<Empty>"
     l.msg(indent + name)
 
     if tnode.has_children():

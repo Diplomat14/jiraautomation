@@ -2,8 +2,7 @@ from jiraautomation.operations.operation import basic_operation
 from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.file import File
-import os
-import urllib.parse
+
 
 class get_files_from_sharepoint(basic_operation):
     __logger = None
@@ -14,16 +13,12 @@ class get_files_from_sharepoint(basic_operation):
 
     @staticmethod
     def init_arguments(operation_group):
-        #   example of url
-        # https://aposteragmbh.sharepoint.com/sites/CPMDocumentation/AUDIARCreator/
         operation_group.add_argument('-spurl', '--sharepointurl', required=False,
                                      help='Sharepoint Url')
         operation_group.add_argument('-spun', '--sharepointusername', required=False,
                                      help='Sharepoint UserName')
         operation_group.add_argument('-sp', '--sharepointpass', required=False,
                                      help='Sharepoint Password')
-        # example of file path
-        #  /sites/CPMDocumentation/AUDIARCreator/Shared%20Documents/01.%20Project%20Management/02.%20Project%20Plan%20%26%20Status/AUDI%20AR-Creator%20MEB%20Plan.xlsx
         operation_group.add_argument('-spfpath', '--sharepointfpath', required=False,
                                      help='Sharepoint File Path')
 

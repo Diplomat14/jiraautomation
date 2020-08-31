@@ -10,7 +10,7 @@ setup(
     version='0.1',
     description='JIRA Simple Automation tool',
     long_description=readme(),
-    url='TBD',
+    url='git@github.com/Diplomat14/jiraautomation',
     author='Aleksey Denysyuk',
     author_email='diplomt@gmail.com',
     license='MIT', #TBD

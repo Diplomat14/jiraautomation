@@ -18,7 +18,7 @@ setup(
     install_requires=[
         'pyyaml',
         'jinja2',
-        'jiraorm @ git+ssh://git@github.com/Diplomat14/jiraorm.git'
+        'jiraorm @ git+http://git@github.com/Diplomat14/jiraorm.git'
         ],
     #dependency_links=['http://server/user/repo/tarball/master#egg=package-1.0'],
     entry_points = {

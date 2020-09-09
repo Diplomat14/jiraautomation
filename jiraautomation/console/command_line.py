@@ -45,8 +45,12 @@ def main():
                     l.warning("Operation %s not implemented" % str(args.operation))
 
             if output != None and args.output != None:
-                with open(args.output, "w", encoding='utf-8') as f:
-                    return f.write(str(output))
+                if isinstance(output, (bytes, bytearray)):
+                    with open(args.output, "wb") as f:
+                        return f.write(output)
+                else:
+                    with open(args.output, "w", encoding='utf-8') as f:
+                        return f.write(str(output))
 
 
         except Exception as e:
